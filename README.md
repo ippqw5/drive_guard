@@ -54,7 +54,9 @@ colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 ```
 source install/setup.bash
-ros2 launch driveguard_description gazebo_sim.launch.py
+
+ros2 launch driveguard_description gazebo_sim.launch.py #两轮差速
+ros2 launch driveguard_description gazebo_sim_ackermann.launch.py #ackermann
 ```
 
 运行导航
@@ -64,7 +66,17 @@ source install/setup.bash
 ros2 launch driveguard_navigation2 navigation2.launch.py
 ```
 
+![sim_ackermann](media/sim_ackermann.png)
+
 ## 3.参考
 
 - https://github.com/fishros/ros2bookcode
 - https://www.bilibili.com/video/BV1gr4y1Q7j5/ 第6-7章
+
+
+## 4.常用命令
+
+- 键盘控制(发布/cmd_vel)
+    ```
+    ros2 run teleop_twist_keyboard teleop_twist_keyboard
+    ```
