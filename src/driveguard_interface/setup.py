@@ -13,8 +13,6 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='fishros',
-    maintainer_email='87068644+fishros@users.noreply.github.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
