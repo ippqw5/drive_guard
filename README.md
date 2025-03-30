@@ -57,6 +57,13 @@ source install/setup.bash
 ros2 launch driveguard_description gazebo_sim.launch.py
 ```
 
+运行cartographer(目前问题：运行导航launch在已有的fishbot项目文件夹下可行,但迁移到driveguard下编译会有问题)
+
+```
+source install/setup.bash
+ros2 launch driveguard_cartographer gcartographer.launch.py
+```
+
 运行导航
 
 ```
