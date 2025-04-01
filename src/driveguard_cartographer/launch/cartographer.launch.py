@@ -11,7 +11,7 @@ def generate_launch_description():
     cartographer_config_file = 'Localization.lua'
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     rviz_config_dir = os.path.join(pkg_share, 'config')+"/cartographer.rviz"
-    pbstream_file = os.path.join(config_dir, 'my.pbstream')
+    pbstream_file = os.path.join(config_dir, 'new.pbstream')
 
     return LaunchDescription([
         # Cartographer 纯定位节点

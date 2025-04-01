@@ -1,9 +1,11 @@
+
 # DriveGuard
 
 ## 1.项目介绍
 
 各功能包功能如下：
 - driveguard_description 机器人模型的描述文件，包含仿真相关配置
+- driveguard_cartographer 建图与定位配置
 - driveguard_navigation2 导航配置
 - driveguard_application 应用功能节点
     - driveguard_interface  提供易用的对外接口，屏蔽ros细节
@@ -57,11 +59,11 @@ source install/setup.bash
 ros2 launch driveguard_description gazebo_sim.launch.py
 ```
 
-运行cartographer(目前问题：运行导航launch在已有的fishbot项目文件夹下可行,但迁移到driveguard下编译会有问题)
+运行cartographer
 
 ```
 source install/setup.bash
-ros2 launch driveguard_cartographer gcartographer.launch.py
+ros2 launch driveguard_cartographer cartographer.launch.py
 ```
 
 运行导航

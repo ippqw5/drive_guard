@@ -10,6 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
+from launch_ros.descriptions import ParameterFile
 from nav2_common.launch import RewrittenYaml
  
  
@@ -34,11 +35,15 @@ def generate_launch_description():
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
  
-    configured_params = RewrittenYaml(
+    configured_params = ParameterFile(
+        RewrittenYaml(
         source_file=params_file,
         root_key=namespace,
         param_rewrites={},
-        convert_types=True)
+        convert_types=True),
+        allow_substs=True,
+    )
+    
  
     stdout_linebuf_envvar = SetEnvironmentVariable(
         'RCUTILS_LOGGING_BUFFERED_STREAM', '1')
@@ -96,6 +101,7 @@ def generate_launch_description():
             package='rclcpp_components',
             executable='component_container_isolated',
             parameters=[configured_params, {'autostart': autostart}],
+            # parameters=[params_file],
             arguments=['--ros-args', '--log-level', log_level],
             remappings=remappings,
             output='screen'),
