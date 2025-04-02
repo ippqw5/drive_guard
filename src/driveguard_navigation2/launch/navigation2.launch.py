@@ -26,10 +26,6 @@ def generate_launch_description():
     #     'params_file', default=os.path.join(driveguard_navigation2_dir, 'launch', 'my.launch.py'))
     # context = LaunchContext()
     # my_launch_path_str = my_launch_path.perform(context)   
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
     return launch.LaunchDescription([
         # 声明新的 Launch 参数
         launch.actions.DeclareLaunchArgument('use_sim_time', default_value=use_sim_time,
