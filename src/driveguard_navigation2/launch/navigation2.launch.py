@@ -27,8 +27,6 @@ def generate_launch_description():
     # context = LaunchContext()
     # my_launch_path_str = my_launch_path.perform(context)   
 
-
-    print(my_launch_path)
     return launch.LaunchDescription([
         # 声明新的 Launch 参数
         launch.actions.DeclareLaunchArgument('use_sim_time', default_value=use_sim_time,
