@@ -4,17 +4,32 @@ import launch_ros
 from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch import LaunchContext
+from launch_ros.descriptions import ParameterFile
+from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
-
     # 获取与拼接默认路径
     driveguard_navigation2_dir = get_package_share_directory(
         'driveguard_navigation2')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     rviz_config_dir = os.path.join(
         nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')
-    
+
+    configured_params = ParameterFile(
+        RewrittenYaml(
+            source_file=os.path.join(nav2_bringup_dir, 'params', 'nav2_params.yaml'),
+            root_key='',
+            param_rewrites={},
+            convert_types=True,
+        ),
+        allow_substs=True,
+    )
+
+    map_yaml_file = os.path.join(driveguard_navigation2_dir, 'maps', 'map.yaml')
+
+    lifecycle_nodes = ['map_server']
+
     # 创建 Launch 配置
     use_sim_time = launch.substitutions.LaunchConfiguration(
         'use_sim_time', default='true')
@@ -46,6 +61,28 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'params_file': nav2_param_path}.items(),
         ),
+
+        launch_ros.actions.Node(
+                package='nav2_map_server',
+                executable='map_server',
+                name='map_server',
+                output='screen',
+                respawn=False,
+                respawn_delay=2.0,
+                parameters=[configured_params, {'yaml_filename': map_yaml_file}],
+                arguments=['--ros-args', '--log-level', 'info'],
+                remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
+            ),
+
+        launch_ros.actions.Node(
+                package='nav2_lifecycle_manager',
+                executable='lifecycle_manager',
+                name='lifecycle_manager_localization',
+                output='screen',
+                arguments=['--ros-args', '--log-level', 'info'],
+                parameters=[{'autostart': True}, {'node_names': lifecycle_nodes}],
+            ),
+
         launch_ros.actions.Node(
             package='rviz2',
             executable='rviz2',
