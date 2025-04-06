@@ -6,7 +6,6 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     driveguard_navigation2_dir = get_package_share_directory('driveguard_navigation2')
 
     rviz_config_dir = os.path.join(driveguard_navigation2_dir, 'rviz', 'driveguard_default_view.rviz')
@@ -28,7 +27,7 @@ def generate_launch_description():
 
         launch.actions.IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [nav2_bringup_dir, '/launch', '/bringup_launch.py']),
+                [driveguard_navigation2_dir, '/launch', '/bringup_launch.py']),
             launch_arguments={
                 'map': map_yaml_path,
                 'use_sim_time': use_sim_time,
