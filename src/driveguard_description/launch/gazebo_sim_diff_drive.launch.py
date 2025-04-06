@@ -5,9 +5,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
     # 获取默认路径
-    robot_name_in_model = "driveguard"
+    robot_name_in_model = "driveguard_diff_drive"
     urdf_tutorial_path = get_package_share_directory('driveguard_description')
-    default_model_path = urdf_tutorial_path + '/urdf/driveguard/driveguard.urdf.xacro'
+    default_model_path = urdf_tutorial_path + '/urdf/diff_drive/diff_drive.urdf.xacro'
     default_world_path = urdf_tutorial_path + '/world/custom_room.world'
     # 为 Launch 声明参数
     action_declare_arg_mode_path = launch.actions.DeclareLaunchArgument(
@@ -39,16 +39,16 @@ def generate_launch_description():
         arguments=['-topic', '/robot_description',
                    '-entity', robot_name_in_model, ])
     
-    # 加载并激活 driveguard_joint_state_broadcaster 控制器
-    load_joint_state_controller = launch.actions.ExecuteProcess(
+    # 加载并激活 driveguard_diff_drive_joint_state_broadcaster 控制器
+    load_driveguard_diff_drive_joint_state_controller = launch.actions.ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-            'driveguard_joint_state_broadcaster'],
+            'driveguard_diff_drive_joint_state_broadcaster'],
         output='screen'
     )
 
-    # 加载并激活 driveguard_effort_controller 控制器
-    load_driveguard_effort_controller = launch.actions.ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active','driveguard_effort_controller'], 
+    # 加载并激活 driveguard_diff_drive_effort_controller 控制器
+    load_driveguard_diff_drive_effort_controller = launch.actions.ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active','driveguard_diff_drive_effort_controller'], 
         output='screen')
     
     load_driveguard_diff_drive_controller = launch.actions.ExecuteProcess(
@@ -64,12 +64,12 @@ def generate_launch_description():
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=spawn_entity_node,
-                on_exit=[load_joint_state_controller],)
+                on_exit=[load_driveguard_diff_drive_joint_state_controller],)
             ),
         # 事件动作，load_driveguard_diff_drive_controller
         launch.actions.RegisterEventHandler(
         event_handler=launch.event_handlers.OnProcessExit(
-            target_action=load_joint_state_controller,
+            target_action=load_driveguard_diff_drive_joint_state_controller,
             on_exit=[load_driveguard_diff_drive_controller],)
             ),
     ])

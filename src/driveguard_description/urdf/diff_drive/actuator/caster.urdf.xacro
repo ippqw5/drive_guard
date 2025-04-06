@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-   <xacro:include filename="$(find driveguard_description)/urdf/driveguard/common_inertia.xacro" />
+   <xacro:include filename="$(find driveguard_description)/urdf/diff_drive/common_inertia.xacro" />
     <xacro:macro name="caster_xacro" params="caster_name xyz">
         <link name="${caster_name}_caster_link">
             <visual>
