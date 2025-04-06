@@ -54,9 +54,12 @@ colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 ```
 source install/setup.bash
+ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py #两轮差速
+```
 
-ros2 launch driveguard_description gazebo_sim.launch.py #两轮差速
-ros2 launch driveguard_description gazebo_sim_ackermann.launch.py #ackermann
+```
+source install/setup.bash
+ros2 launch driveguard_description gazebo_sim_ackermann.launch.py #阿克曼
 ```
 
 运行导航

@@ -2,15 +2,15 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
     use_sim_time: true
-    driveguard_joint_state_broadcaster:
+    driveguard_diff_drive_joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
       use_sim_time: true
-    driveguard_effort_controller:
+    driveguard_diff_drive_effort_controller:
       type: effort_controllers/JointGroupEffortController
     driveguard_diff_drive_controller:
       type: diff_drive_controller/DiffDriveController
 
-driveguard_effort_controller:
+driveguard_diff_drive_effort_controller:
   ros__parameters:
     joints:
       - left_wheel_joint
