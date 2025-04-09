@@ -11,7 +11,7 @@
 
     <xacro:base_xacro length="0.12" radius="0.1" />
     <!-- 传感器 -->
-    <xacro:imu_xacro xyz="0 0 0.02" />
+    <xacro:imu_xacro xyz="0 0 0" />
     <xacro:laser_xacro xyz="0 0 0.10" />
     <xacro:camera_xacro xyz="0.10 0 0.075" />
     <!-- 执行器主动轮+从动轮 -->
