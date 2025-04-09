@@ -56,6 +56,11 @@ colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 ```
 source install/setup.bash
+ros2 launch driveguard_description gazebo_sim.launch.py #两轮差速（new）
+```
+
+```
+source install/setup.bash
 ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py #两轮差速
 ```
 
@@ -91,4 +96,11 @@ ros2 launch driveguard_navigation2 navigation2.launch.py
 - 键盘控制(发布/cmd_vel)
     ```
     ros2 run teleop_twist_keyboard teleop_twist_keyboard
+    ```
+
+## 5.一键启动（两轮差速）
+
+- 
+    ```
+    ./start.sh
     ```
