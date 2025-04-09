@@ -26,7 +26,7 @@ endif()
 ament_package()
 
 install(
-  DIRECTORY config launch rviz
+  DIRECTORY config launch rviz map
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -7,11 +7,12 @@ import os
 def generate_launch_description():
     pkg_share = FindPackageShare('driveguard_cartographer').find('driveguard_cartographer')
     config_dir = os.path.join(pkg_share, 'config')
+    map_dir = os.path.join(pkg_share, 'map')
     # 建图时使用 MySlam.lua ，纯定位时使用 Localization.lua
     cartographer_config_file = 'Localization.lua'
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     rviz_config_dir = os.path.join(pkg_share, 'config')+"/cartographer.rviz"
-    pbstream_file = os.path.join(config_dir, 'new.pbstream')
+    pbstream_file = os.path.join(map_dir, 'new.pbstream')
 
     return LaunchDescription([
         # Cartographer 纯定位节点

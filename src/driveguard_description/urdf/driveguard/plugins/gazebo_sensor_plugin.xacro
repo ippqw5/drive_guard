@@ -51,6 +51,8 @@
                 <namespace>/</namespace>
                 <remapping>~/out:=imu</remapping>
             </ros>
+            <!-- IMU 数据所参考的坐标系，默认会找父link,即base_foortprint -->
+            <frame_name>imu_link</frame_name>
             <initial_orientation_as_reference>false</initial_orientation_as_reference>
         </plugin>
         <update_rate>100</update_rate>
