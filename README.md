@@ -100,7 +100,17 @@ ros2 launch driveguard_navigation2 navigation2.launch.py
 
 ## 5.一键启动（两轮差速）
 
-- 
+- 默认启动两轮差速模型
     ```
     ./start.sh
+    ```
+
+- 启动时候重新构建功能包
+    ```
+    ./start.sh -c
+    ```
+
+- 启动阿克曼模型
+    ```
+    ./start.sh -a
     ```
