@@ -98,14 +98,14 @@ ros2 launch driveguard_navigation2 navigation2.launch.py
     ros2 run teleop_twist_keyboard teleop_twist_keyboard
     ```
 
-## 5.一键启动（两轮差速）
+## 5.一键启动
 
 - 默认启动两轮差速模型
     ```
     ./start.sh
     ```
 
-- 启动时候重新构建功能包
+- 启动时重新构建功能包
     ```
     ./start.sh -c
     ```
