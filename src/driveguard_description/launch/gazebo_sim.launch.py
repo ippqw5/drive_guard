@@ -1,9 +1,14 @@
 import launch
 import launch_ros
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time", default_value="true", description="Use simulation clock if true"
+    )
     # 获取默认路径
     robot_name_in_model = "driveguard"
     urdf_tutorial_path = get_package_share_directory('driveguard_description')
@@ -16,13 +21,18 @@ def generate_launch_description():
     # 获取文件内容生成新的参数
     robot_description = launch_ros.parameter_descriptions.ParameterValue(
         launch.substitutions.Command(
-            ['xacro ', launch.substitutions.LaunchConfiguration('model')]),
+            ['xacro ', LaunchConfiguration('model')]),
         value_type=str)
   	
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}]
+        parameters=[
+            {
+                'use_sim_time': LaunchConfiguration("use_sim_time"),
+                'robot_description': robot_description
+            }
+        ]
     )
 
     # 启动gazebo并加载地图
@@ -56,6 +66,7 @@ def generate_launch_description():
         output='screen')
     
     return launch.LaunchDescription([
+        use_sim_time_arg,
         action_declare_arg_mode_path,
         robot_state_publisher_node,
         launch_gazebo,

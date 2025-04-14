@@ -14,7 +14,7 @@ def generate_launch_description():
         'driveguard_navigation2')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     rviz_config_dir = os.path.join(
-        nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')
+        driveguard_navigation2_dir, 'rviz', 'driveguard_default_view.rviz')
 
     configured_params = ParameterFile(
         RewrittenYaml(
@@ -62,26 +62,26 @@ def generate_launch_description():
                 'params_file': nav2_param_path}.items(),
         ),
 
-        launch_ros.actions.Node(
-                package='nav2_map_server',
-                executable='map_server',
-                name='map_server',
-                output='screen',
-                respawn=False,
-                respawn_delay=2.0,
-                parameters=[configured_params, {'yaml_filename': map_yaml_file}],
-                arguments=['--ros-args', '--log-level', 'info'],
-                remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
-            ),
+        # launch_ros.actions.Node(
+        #         package='nav2_map_server',
+        #         executable='map_server',
+        #         name='map_server',
+        #         output='screen',
+        #         respawn=False,
+        #         respawn_delay=2.0,
+        #         parameters=[configured_params, {'yaml_filename': map_yaml_file}],
+        #         arguments=['--ros-args', '--log-level', 'info'],
+        #         remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
+        #     ),
 
-        launch_ros.actions.Node(
-                package='nav2_lifecycle_manager',
-                executable='lifecycle_manager',
-                name='lifecycle_manager_localization',
-                output='screen',
-                arguments=['--ros-args', '--log-level', 'info'],
-                parameters=[{'autostart': True}, {'node_names': lifecycle_nodes}],
-            ),
+        # launch_ros.actions.Node(
+        #         package='nav2_lifecycle_manager',
+        #         executable='lifecycle_manager',
+        #         name='lifecycle_manager_localization',
+        #         output='screen',
+        #         arguments=['--ros-args', '--log-level', 'info'],
+        #         parameters=[{'autostart': True}, {'node_names': lifecycle_nodes}],
+        #     ),
 
         launch_ros.actions.Node(
             package='rviz2',
