@@ -20,26 +20,31 @@
 
 ### 2.1安装
 
-建图采用 slam-toolbox，导航采用 Navigation 2 ,仿真采用 Gazebo，运动控制采用 ros2-control 实现，构建之前请先安装依赖，指令如下：
+建图采用slam-toolbox或cartographer，采用robot_localization增强定位，导航采用Navigation2 ,仿真采用Gazebo，控制采用ros2-control。
 
-1. 安装 SLAM 和 Navigation 2
-
+构建之前请先安装依赖包：
 ```
-sudo apt install ros-$ROS_DISTRO-nav2-bringup ros-$ROS_DISTRO-slam-toolbox
-```
-> 图已经建过了，保存在 src/driveguard_navigation2/maps
+# slam_toolbox
+sudo apt install ros-humble-slam-toolbox
 
-2. 安装仿真相关功能包
+# cartographer 
+sudo apt install ros-humble-cartographer ros-humble-cartographer-ros ros-humble-cartographer-rviz
 
-```
-sudo apt install ros-$ROS_DISTRO-robot-state-publisher  ros-$ROS_DISTRO-joint-state-publisher ros-$ROS_DISTRO-ros2-control gazebo ros-$ROS_DISTRO-gazebo-ros-pkgs ros-$ROS_DISTRO-ros2-controllers ros-$ROS_DISTRO-gazebo-ros2-control ros-$ROS_DISTRO-xacro 
-```
+# Naviagtion2
+sudo apt install ros-humble-nav2* ros-humble-slam-toolbox
 
-3. 安装transforms3d库，欧拉角<-->四元数
+# 仿真相关
+sudo apt install ros-humble-robot-state-publisher  ros-humble-joint-state-publisher ros-humble-ros2-control gazebo ros-humble-gazebo-ros-pkgs ros-humble-ros2-controllers ros-humble-gazebo-ros2-control ros-humble-xacro 
 
-```
-sudo apt install ros-$ROS_DISTRO-tf-transformations
+# transforms3d库，转换欧拉角与四元数
+sudo apt install ros-humble-tf-transformations
 sudo pip3 install transforms3d
+
+# robot_localization
+sudo apt install ros-humble-robot-localization
+
+# ros2_control
+sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
 ```
 
 ### 2.2运行
@@ -55,18 +60,13 @@ colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 运行仿真
 
 ```
+#两轮差速
 source install/setup.bash
-ros2 launch driveguard_description gazebo_sim.launch.py #两轮差速（new）
-```
+ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py 
 
-```
+#阿克曼
 source install/setup.bash
-ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py #两轮差速
-```
-
-```
-source install/setup.bash
-ros2 launch driveguard_description gazebo_sim_ackermann.launch.py #阿克曼
+ros2 launch driveguard_description gazebo_sim_racecar.launch.py 
 ```
 
 运行cartographer
@@ -79,38 +79,21 @@ ros2 launch driveguard_cartographer cartographer.launch.py
 运行导航
 
 ```
+#两轮差速
 source install/setup.bash
-ros2 launch driveguard_navigation2 navigation2.launch.py
+ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py 
+
+#阿克曼
+source install/setup.bash
+ros2 launch driveguard_navigation2 nav2_racecar.launch.py
 ```
 
 ![sim_ackermann](media/sim_ackermann.png)
 
-## 3.参考
 
-- https://github.com/fishros/ros2bookcode
-- https://www.bilibili.com/video/BV1gr4y1Q7j5/ 第6-7章
-
-
-## 4.常用命令
+## 3.常用命令
 
 - 键盘控制(发布/cmd_vel)
-    ```
-    ros2 run teleop_twist_keyboard teleop_twist_keyboard
-    ```
-
-## 5.一键启动
-
-- 默认启动两轮差速模型
-    ```
-    ./start.sh
-    ```
-
-- 启动时重新构建功能包
-    ```
-    ./start.sh -c
-    ```
-
-- 启动阿克曼模型
-    ```
-    ./start.sh -a
-    ```
+```
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```

@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="ackermann">
-    <xacro:include filename="ackermann_base.urdf.xacro" />
-    <xacro:include filename="ackermann_gazebo_core.urdf.xacro" />
-</robot>

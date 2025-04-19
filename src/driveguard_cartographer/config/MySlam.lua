@@ -33,7 +33,7 @@ MAP_BUILDER.use_trajectory_builder_2d = true  -- 2d建图
 TRAJECTORY_BUILDER_2D.min_range = 0.1 --激光的最近距离（考虑机器人半径）
 TRAJECTORY_BUILDER_2D.max_range = 15  --激光的最远距离
 TRAJECTORY_BUILDER_2D.missing_data_ray_length = 3.  -- 传感器数据超出有效范围最大值
-TRAJECTORY_BUILDER_2D.use_imu_data = true    -- 使用IMU时，IMU数据的坐标系要和 tracking_frame 一致(imu_link和base_footprint最好一致)
+TRAJECTORY_BUILDER_2D.use_imu_data = false    -- 使用IMU时，IMU数据的坐标系要和 tracking_frame 一致(imu_link和base_footprint最好一致)
 TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true  -- 使用实时回环检测来进行前端的匹配
 TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.1)  -- 1改为0.1，提高对运动的敏感度
 
