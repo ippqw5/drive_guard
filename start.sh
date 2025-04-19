@@ -29,7 +29,7 @@ if $use_ackermann; then
     # 启动 ackermann 仿真
     ros2 launch driveguard_description gazebo_sim_ackermann.launch.py &
 else
-    # 启动默认仿真
+    # 启动 diff_drive 仿真
     ros2 launch driveguard_description gazebo_sim.launch.py &
 fi
 
@@ -43,4 +43,8 @@ ros2 launch driveguard_cartographer cartographer.launch.py &
 sleep 5
 
 # 启动导航
-ros2 launch driveguard_navigation2 navigation2.launch.py
+if $use_ackermann; then
+    ros2 launch driveguard_navigation2 nav2_ackermann.launch.py
+else
+    ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py
+fi
