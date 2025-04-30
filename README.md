@@ -7,11 +7,8 @@
 - driveguard_description 机器人模型的描述文件，包含仿真相关配置
 - driveguard_cartographer 建图与定位配置
 - driveguard_navigation2 导航配置
-- driveguard_application 应用功能节点
-    - driveguard_interface  提供易用的对外接口，屏蔽ros细节
-        - 实时获得当前位置 get_robot_pose
-        - 设置初始位置 init_robot_pose
-    - test
+- driveguard_interface  提供易用的对外接口，屏蔽ros细节
+
 
 ## 2.使用方法   
 
@@ -37,14 +34,18 @@ sudo apt install ros-humble-nav2* ros-humble-slam-toolbox
 sudo apt install ros-humble-robot-state-publisher  ros-humble-joint-state-publisher ros-humble-ros2-control gazebo ros-humble-gazebo-ros-pkgs ros-humble-ros2-controllers ros-humble-gazebo-ros2-control ros-humble-xacro 
 
 # transforms3d库，转换欧拉角与四元数
-sudo apt install ros-humble-tf-transformations
-sudo pip3 install transforms3d
+sudo apt install ros-humble-tf-transformations 
+sudo pip3 install transforms3d 
 
 # robot_localization
 sudo apt install ros-humble-robot-localization
 
 # ros2_control
 sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
+
+# opencv
+sudo apt install ros-humble-cv-bridge
+sudo pip3 install opencv-python
 ```
 
 ### 2.2运行
