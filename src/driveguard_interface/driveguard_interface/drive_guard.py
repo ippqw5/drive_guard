@@ -73,6 +73,17 @@ if __name__ == "__main__":
     if drive_guard.display_image():
         print("Image displayed. Press any key in the image window to continue.")
         cv2.waitKey(0)  # Wait until a key is pressed
+
+    while True:
+        time.sleep(2)
+
+        twist_target_frame = drive_guard.node.get_twist_target_frame()
+        if twist_target_frame:
+            print("Twist in Target Frame:", twist_target_frame)
+        
+        speed = drive_guard.node.get_speed()
+        if speed is not None:
+            print("Current speed:", speed)
     
     # Shutdown the node
     drive_guard.shutdown()
