@@ -1,6 +1,6 @@
 #!/bin/bash
 
- # 标记是否存在 -c 参数
+# 标记是否存在 -c 参数
 build=false
 
 # 标记是否存在 -a 参数
@@ -27,10 +27,10 @@ source install/setup.bash
 # 在后台启动gazebo仿真，根据 -a 参数决定启动哪个仿真
 if $use_ackermann; then
     # 启动 ackermann 仿真
-    ros2 launch driveguard_description gazebo_sim_ackermann.launch.py &
+    ros2 launch driveguard_description gazebo_sim_racecar.launch.py &
 else
-    # 启动默认仿真
-    ros2 launch driveguard_description gazebo_sim.launch.py &
+    # 启动 diff_drive 仿真
+    ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py &
 fi
 
 # 等待一段时间确保gazebo完全启动
@@ -43,4 +43,8 @@ ros2 launch driveguard_cartographer cartographer.launch.py &
 sleep 5
 
 # 启动导航
-ros2 launch driveguard_navigation2 navigation2.launch.py
+if $use_ackermann; then
+    ros2 launch driveguard_navigation2 nav2_racecar.launch.py
+else
+    ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py
+fi
