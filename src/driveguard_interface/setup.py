@@ -18,8 +18,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'init_robot_pose=driveguard_interface.init_robot_pose:main',
-            'get_robot_pose=driveguard_interface.get_robot_pose:main',
+
         ],
     },
 )

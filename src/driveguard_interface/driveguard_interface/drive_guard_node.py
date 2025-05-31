@@ -1,20 +1,18 @@
 import rclpy
-import tf2_ros
+from tf2_ros import *
 import threading
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import Image
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import TransformStamped, Twist
 from rclpy.node import Node
-from scipy.spatial.transform import Rotation as R
-import numpy as np
 
 class DriveGuardNode(Node):
     def __init__(self):
         super().__init__('drive_guard_node')
-        self.latest_imu_data : Imu = None
-        self.latest_raw_image : Image = None
-        self.latest_odom_data : Odometry = None
+        self.latest_imu_data : Imu
+        self.latest_raw_image : Image
+        self.latest_odom_data : Odometry
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
         
@@ -25,18 +23,23 @@ class DriveGuardNode(Node):
             self.imu_callback,
             10
         )
-
         self.create_subscription(
             Image,
             '/camera/image_raw',
             self.image_callback,
             10
         )
-
         self.create_subscription(
             Odometry,
             '/odom',
             self.odom_callback,
+            10
+        )
+        
+        # Initialize pushlishers for cmd_vel if needed
+        self.cmd_vel_publisher = self.create_publisher(
+            Twist,
+            '/cmd_vel',
             10
         )
         
@@ -58,15 +61,6 @@ class DriveGuardNode(Node):
     
     def odom_callback(self, msg):
         self.latest_odom_data = msg
-    
-    def get_imu_data(self) -> Imu:
-        return self.latest_imu_data
-
-    def get_raw_image(self) -> Image:
-        return self.latest_raw_image
-
-    def get_odom_data(self) -> Odometry:
-        return self.latest_odom_data
 
     def get_pose(self, base_frame_id='map', target_frame_id='base_footprint') -> TransformStamped:
         try:
@@ -94,10 +88,6 @@ class DriveGuardNode(Node):
         if self.spin_thread.is_alive():
             self.spin_thread.join()
         super().destroy_node()
-
-    # def shutdown(self):
-    #     super().destroy_node()
-    #     rclpy.shutdown()
 
     def _verify_topics(self):
         """Verify that the topics we're subscribing to exist"""

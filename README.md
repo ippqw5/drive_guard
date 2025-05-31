@@ -35,7 +35,7 @@ sudo apt install ros-humble-robot-state-publisher  ros-humble-joint-state-publis
 
 # transforms3d库，转换欧拉角与四元数
 sudo apt install ros-humble-tf-transformations 
-sudo pip3 install transforms3d 
+pip3 install transforms3d 
 
 # robot_localization
 sudo apt install ros-humble-robot-localization
@@ -45,7 +45,7 @@ sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
 
 # opencv
 sudo apt install ros-humble-cv-bridge
-sudo pip3 install opencv-python
+pip3 install opencv-python
 ```
 
 ### 2.2运行
@@ -97,4 +97,16 @@ ros2 launch driveguard_navigation2 nav2_racecar.launch.py
 - 键盘控制(发布/cmd_vel)
 ```
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+## 4.生存API文档
+![API](media/API.png)
+### 安装sphinx
+```pip3 install sphinx```
+
+### 生成文档 (doc/out/html/index.html)
+```bash
+cd src/driveguard_interface/driveguard_interface/doc
+
+./build_doc.sh
 ```
