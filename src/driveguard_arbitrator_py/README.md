@@ -11,18 +11,22 @@ ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py
 
 source install/setup.bash
 ros2 launch driveguard_cartographer cartographer.launch.py
-
-source install/setup.bash
-ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py 
-
 ```
 
-### 运行
+### (1)运行仲裁节点
 ```
 source install/setup.bash
-ros2 launch driveguard_arbitrator_py driveguard_arbitratorpy.launch.py
+ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py
+
+source install/setup.bash
+ros2 launch driveguard_arbitrator_py driveguard_arbitrator_py.launch.py
 ```
 
+### (2)运行仲裁节点（传递参数use_arbitrator）
+```
+source install/setup.bash
+ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py use_arbitrator:=true
+```
 
 ### 测试
 输入

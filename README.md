@@ -82,10 +82,12 @@ ros2 launch driveguard_cartographer cartographer.launch.py
 ```
 #两轮差速
 source install/setup.bash
+# option:use_arbitrator 启用仲裁节点
 ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py 
 
 #阿克曼
 source install/setup.bash
+# option:use_arbitrator
 ros2 launch driveguard_navigation2 nav2_racecar.launch.py
 ```
 

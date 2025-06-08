@@ -36,6 +36,8 @@ def generate_launch_description():
         'params_file', default=os.path.join(driveguard_navigation2_dir, 'config', 'racecar_params.yaml'))
     use_map_server = launch.substitutions.LaunchConfiguration(
         'use_map_server', default='true')
+    use_arbitrator = launch.substitutions.LaunchConfiguration(
+        'use_arbitrator', default='false')
     
     return launch.LaunchDescription([
         # 声明新的 Launch 参数
@@ -43,13 +45,17 @@ def generate_launch_description():
                                              description='Use simulation (Gazebo) clock if true'),
         launch.actions.DeclareLaunchArgument('params_file', default_value=nav2_param_path,
                                              description='Full path to param file to load'),
+        launch.actions.DeclareLaunchArgument('use_arbitrator', default_value='false',
+                                             description='Use arbitrator for navigation if true'),
 
         launch.actions.IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(driveguard_navigation2_dir, 'launch', 'my.launch.py')),
             launch_arguments={
                 'use_sim_time': use_sim_time,
-                'params_file': nav2_param_path}.items(),
+                'params_file': nav2_param_path,
+                'use_arbitrator': use_arbitrator
+                }.items(),
         ),
 
         launch_ros.actions.Node(

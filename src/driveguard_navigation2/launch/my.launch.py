@@ -5,7 +5,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, GroupAction,
                             IncludeLaunchDescription, SetEnvironmentVariable)
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition,UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
@@ -15,10 +15,17 @@ from nav2_common.launch import RewrittenYaml
  
  
 def generate_launch_description():
+    use_arbitrator = LaunchConfiguration('use_arbitrator', default='false')
     # Get the launch directory
-    bringup_dir = get_package_share_directory('driveguard_navigation2')
+    bringup_dir = get_package_share_directory('nav2_bringup')
     launch_dir = os.path.join(bringup_dir, 'launch')
-    #cartographer_launch_dir = os.path.join(get_package_share_directory('turtlebot3_cartographer'), 'launch')
+
+    my_bringup_dir = get_package_share_directory('driveguard_navigation2')
+    my_launch_dir = os.path.join(bringup_dir, 'launch')
+
+    arbitrator_dir = get_package_share_directory('driveguard_arbitrator_py')
+    arbitrator_launch_dir = os.path.join(arbitrator_dir, 'launch')
+ 
  
     # Create the launch configuration variables
     namespace = LaunchConfiguration('namespace')
@@ -106,10 +113,6 @@ def generate_launch_description():
             remappings=remappings,
             output='screen'),
  
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource(os.path.join(cartographer_launch_dir,
-        #                                                'cartographer_localization.launch.py'))),
- 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(launch_dir, 'navigation_launch.py')),
             launch_arguments={'namespace': namespace,
@@ -118,7 +121,24 @@ def generate_launch_description():
                               'params_file': params_file,
                               'use_composition': use_composition,
                               'use_respawn': use_respawn,
-                              'container_name': 'nav2_container'}.items()),
+                              'container_name': 'nav2_container'}.items(),
+            condition=UnlessCondition(use_arbitrator)
+                              ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(my_launch_dir, 'navigation_launch.py')),
+            launch_arguments={'namespace': namespace,
+                              'use_sim_time': use_sim_time,
+                              'autostart': autostart,
+                              'params_file': params_file,
+                              'use_composition': use_composition,
+                              'use_respawn': use_respawn,
+                              'container_name': 'nav2_container'}.items(),
+            condition=IfCondition(use_arbitrator)
+                              ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(arbitrator_launch_dir,'driveguard_arbitrator_py.launch.py')),
+            condition=IfCondition(use_arbitrator)
+                              ),
     ])
  
     # Create the launch description and populate

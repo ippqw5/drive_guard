@@ -88,13 +88,6 @@ class CmdVelArbitratorNode(Node):
             Twist, '/cmd_vel_model', self.model_callback, 10)
         self.safety_sub = self.create_subscription(
             Twist, '/cmd_vel_safe', self.safety_callback, 10)
-        self.action_status_sub = self.create_subscription(
-            GoalStatusArray,
-            '/navigate_to_pose/_action/status',  # 默认 Action 状态话题
-            self.status_callback,
-            10)
-
-
 
         # 定时器 (100ms)
         self.timer = self.create_timer(0.1, self.publish_muxed_cmd)
@@ -125,17 +118,27 @@ class CmdVelArbitratorNode(Node):
     
     def publish_muxed_cmd(self):
         self.target.header.stamp = self.get_clock().now().to_msg()
+        self.select_and_publish_command()
+
+    def select_and_publish_command(self):
         timeout = Duration(seconds=0.5)
         now = self.get_clock().now()
         
         if (now - self.last_model_time) < timeout:
-            self.vehicle_return = False
-            self.cmd_pub.publish(self.latest_model)
+            self.publish_model_command()
         else:
-            if not self.vehicle_return:
-                self.pose_pub.publish(self.target)
-                self.vehicle_return = True
-            self.cmd_pub.publish(self.latest_safety)
+            self.publish_safety_command()
+
+    def publish_model_command(self):
+        self.vehicle_return = False
+        self.cmd_pub.publish(self.latest_model)
+
+    def publish_safety_command(self):
+        if not self.vehicle_return:
+            self.pose_pub.publish(self.target)
+            self.vehicle_return = True
+        self.cmd_pub.publish(self.latest_safety)
+
 
 def main(args=None):
     rclpy.init(args=args)

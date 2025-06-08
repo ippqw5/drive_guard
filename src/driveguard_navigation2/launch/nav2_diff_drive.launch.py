@@ -35,6 +35,8 @@ def generate_launch_description():
         'use_sim_time', default='true')
     nav2_param_path = launch.substitutions.LaunchConfiguration(
         'params_file', default=os.path.join(driveguard_navigation2_dir, 'config', 'diff_drive_params.yaml'))
+    use_arbitrator = launch.substitutions.LaunchConfiguration(
+        'use_arbitrator', default='false')
     
     # 如果使用[]嵌套对象需要解析位为字符串
     # my_launch_path = launch.substitutions.LaunchConfiguration(
@@ -47,6 +49,8 @@ def generate_launch_description():
                                              description='Use simulation (Gazebo) clock if true'),
         launch.actions.DeclareLaunchArgument('params_file', default_value=nav2_param_path,
                                              description='Full path to param file to load'),
+        launch.actions.DeclareLaunchArgument('use_arbitrator', default_value='false',
+                                             description='Use arbitrator for navigation if true'),
 
         launch.actions.IncludeLaunchDescription(
             # my_launch_path = /home/driveguard/Desktop/drive_guard/install/driveguard_navigation2/share/driveguard_navigation2/launch/my.launch.py
@@ -59,7 +63,9 @@ def generate_launch_description():
             # 使用 Launch 参数替换原有参数
             launch_arguments={
                 'use_sim_time': use_sim_time,
-                'params_file': nav2_param_path}.items(),
+                'params_file': nav2_param_path,
+                'use_arbitrator': use_arbitrator
+                }.items(),
         ),
 
         launch_ros.actions.Node(
