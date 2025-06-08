@@ -46,6 +46,9 @@ sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
 # opencv
 sudo apt install ros-humble-cv-bridge
 pip3 install opencv-python
+
+# calar python api
+pip3 install carla
 ```
 
 ### 2.2运行
@@ -99,14 +102,17 @@ ros2 launch driveguard_navigation2 nav2_racecar.launch.py
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
-## 4.生存API文档
+## 4.生成API文档
 ![API](media/API.png)
 ### 安装sphinx
-```pip3 install sphinx```
+```sh
+pip3 install sphinx
+pip install sphinx-book-theme
+```
 
-### 生成文档 (doc/out/html/index.html)
+### 生成(build/html/index.html)
 ```bash
-cd src/driveguard_interface/driveguard_interface/doc
+cd src/driveguard_interface/docs
 
-./build_doc.sh
+./build.sh
 ```
