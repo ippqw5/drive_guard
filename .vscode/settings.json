@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/driveguard_interface/src"
+    ]
+}
