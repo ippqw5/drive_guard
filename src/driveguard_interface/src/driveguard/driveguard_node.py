@@ -2,6 +2,9 @@ import threading
 import numpy as np
 import transforms3d
 import time
+import torch
+import cv2
+import cv_bridge
 
 import rclpy
 from rclpy.node import Node
@@ -22,6 +25,13 @@ class DriveGuardNode(Node):
     def __init__(self):
         rclpy.init()
         super().__init__('drive_guard_node')
+
+        self.imu_topic_name = '/imu'
+        self.camera_topic_name = '/camera_sensor/image_raw'
+        self.odom_topic_name = '/odom'
+        self.cmd_vel_topic_name = '/cmd_vel'
+        self.cmd_vel_ai_topic_name = '/cmd_vel_ai'
+
         self.latest_imu_data : Imu = None
         self.latest_raw_image : Image = None
         self.latest_odom_data : Odometry = None
@@ -31,19 +41,19 @@ class DriveGuardNode(Node):
         # Initialize subscribers for IMU data, raw image, and tf tree
         self.create_subscription(
             Imu,
-            '/imu',
+            self.imu_topic_name,
             self._imu_callback,
             10
         )
         self.create_subscription(
             Image,
-            '/camera/image_raw',
+            self.camera_topic_name,
             self._image_callback,
             10
         )
         self.create_subscription(
             Odometry,
-            '/odom',
+            self.odom_topic_name,
             self._odom_callback,
             10
         )
@@ -51,11 +61,17 @@ class DriveGuardNode(Node):
         # Initialize pushlishers for cmd_vel if needed
         self.cmd_vel_publisher = self.create_publisher(
             Twist,
-            '/cmd_vel',
+            self.cmd_vel_topic_name,
             10
         )
-        
-        # [Must] Spin the node in a separate thread 
+
+        self.cmd_vel_ai_publisher = self.create_publisher(
+            Twist,
+            self.cmd_vel_ai_topic_name,
+            10
+        )
+
+        # [Must] Spin the node in a separate thread
         self.spin_thread = threading.Thread(target=self._spin_node)
         self.spin_thread.daemon = True
         self.spin_thread.start()
@@ -81,13 +97,13 @@ class DriveGuardNode(Node):
         from rclpy.topic_endpoint_info import TopicEndpointTypeEnum
         
         # Get list of publishers
-        publishers = self.get_publishers_info_by_topic('/imu')
+        publishers = self.get_publishers_info_by_topic(self.imu_topic_name)
         imu_exists = len(publishers) > 0
-        
-        publishers = self.get_publishers_info_by_topic('/camera/image_raw')
+
+        publishers = self.get_publishers_info_by_topic(self.camera_topic_name)
         camera_exists = len(publishers) > 0
 
-        publishers = self.get_publishers_info_by_topic('/odom')
+        publishers = self.get_publishers_info_by_topic(self.odom_topic_name)
         odom_exists = len(publishers) > 0
         
         self.get_logger().warn(f"IMU topic exists: {imu_exists}")
@@ -104,13 +120,14 @@ class DriveGuardNode(Node):
         self.set_twist(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     
     def shutdown(self):
-        self.get_logger().warn("Shutting down DriveGuardNode:")
+        self.get_logger().warn("Destroying")
         self.stop()
         rclpy.try_shutdown()
         if self.spin_thread.is_alive():
             self.spin_thread.join()
         super().destroy_node()        
-        
+        self.get_logger().warn("Destroyed")
+
 ####################################################################
 ####################################################################
 ####################################################################
@@ -126,7 +143,30 @@ class DriveGuardNode(Node):
             self.get_logger().warn("No raw image data available")
             return None
         return self.latest_raw_image
+
+    def get_image_tensor(self, resize: tuple = (224,224), normalize: bool = True, cuda: bool = True) -> torch.Tensor:
+        image = self.get_raw_image()
+        if image is None:
+            return None
+
+        # Convert ROS Image message to OpenCV format
+        cv_image = cv_bridge.CvBridge().imgmsg_to_cv2(image, desired_encoding='rgb8')
+
+        if resize:
+            cv_image = cv2.resize(cv_image, (resize[0], resize[1]))
+
+        image_tensor = torch.from_numpy(cv_image).permute(2, 0, 1)  # Change to CxHxW format
+
+        if normalize:
+            image_tensor = image_tensor.float() / 255.0  # Normalize to [0, 1]
+
+        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
     
+        if cuda:
+            image_tensor = image_tensor.cuda()
+
+        return image_tensor
+
     def get_imu_data(self) -> Imu:
         if self.latest_imu_data is None:
             self.get_logger().warn("No IMU data available")
@@ -357,3 +397,26 @@ class DriveGuardNode(Node):
         twist_msg.angular.z = angular_z
 
         self.cmd_vel_publisher.publish(twist_msg)
+
+    def set_twist_ai(self, linear_x=0.0, linear_y=0.0, linear_z=0.0,
+                     angular_x=0.0, angular_y=0.0, angular_z=0.0):
+        """
+        Set twist under the local frame(base_link) for AI control.
+
+        Args:
+            linear_x (float): Linear velocity in x direction.
+            linear_y (float): Linear velocity in y direction.
+            linear_z (float): Linear velocity in z direction.
+            angular_x (float): Angular velocity around x axis.
+            angular_y (float): Angular velocity around y axis.
+            angular_z (float): Angular velocity around z axis.
+        """
+        twist_msg = Twist()
+        twist_msg.linear.x = linear_x
+        twist_msg.linear.y = linear_y
+        twist_msg.linear.z = linear_z
+        twist_msg.angular.x = angular_x
+        twist_msg.angular.y = angular_y
+        twist_msg.angular.z = angular_z
+
+        self.cmd_vel_ai_publisher.publish(twist_msg)
