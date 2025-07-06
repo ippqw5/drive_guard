@@ -5,4 +5,4 @@ from .driveguard_sensor import *
 from .driveguard_vehicle import *
 from .driveguard_carla_bridge import *
 
-from carla import Vector2D, Vector3D, Transform, Location, Rotation
+from carla import Vector2D, Vector3D, Transform, Location, Rotation, BoundingBox, Color

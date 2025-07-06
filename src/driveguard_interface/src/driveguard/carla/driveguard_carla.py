@@ -8,10 +8,10 @@ from .driveguard_vehicle import Vehicle
 from .driveguard_sensor import Sensor
 
 
-EGO_VEHICLE = "vehicle"
-EGO_IMU = "imu"
-EGO_CAMERA = "camera"
-EGO_LIDAR = "lidar"
+EGO_VEHICLE = int(0)
+EGO_IMU = int(1)
+EGO_CAMERA = int(2)
+EGO_LIDAR = int(3)
 
 
 class World():
@@ -27,6 +27,9 @@ class World():
         if World._initialized:
             return
 
+        self.id = 0
+        self.debug = None
+        
         self.node = DriveGuardNode()
         self.node.world = self
         self.ego_vehicle = Vehicle(name="vehicle", node=self.node)
@@ -35,30 +38,33 @@ class World():
         self.ego_lidar = Sensor(name="lidar", node=self.node)
         World._initialized = True
 
-    def get_actor(self, actor: str) -> Actor | None:
+    def __str__(self):
+        return f"World(id={self.id})"
+
+    def get_actor(self, actor_id: int) -> Actor | None:
         """
-        Get the actor instance by type.
+        Looks up for an actor by ID and returns None if not found. 
 
         Args:
-            actor (str): The type of actor to get.
+            actor_id (int)
 
         Returns:
-            Vehicle | Sensor | None: The actor instance or None if not found.
+            Actor | None: The actor instance or None if not found.
         """
-        if actor == EGO_VEHICLE:
+        if actor_id == EGO_VEHICLE:
             return self.ego_vehicle
         else:
-            sensor = self.get_sensor(actor)
+            sensor = self.get_sensor(actor_id)
             if sensor:
                 return sensor
         return None
 
-    def get_sensor(self, sensor: str) -> Sensor | None:
+    def get_sensor(self, sensor_id: int) -> Sensor | None:
         """
         Get the sensor instance by type.
 
         Args:
-            sensor (str): The type of sensor to get.
+            sensor_id (int): The ID of the sensor to get.
 
         Returns:
             Sensor | None: The sensor instance or None if not found.
@@ -68,7 +74,7 @@ class World():
             EGO_CAMERA: self.ego_camera,
             EGO_LIDAR: self.ego_lidar
         }
-        return sensor_map.get(sensor, None)
+        return sensor_map.get(sensor_id, None)
 
     def shutdown(self):
         """

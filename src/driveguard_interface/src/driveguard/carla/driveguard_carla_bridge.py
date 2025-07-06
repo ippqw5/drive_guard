@@ -12,6 +12,9 @@ from transforms3d.euler import euler2mat, quat2euler, euler2quat
 from transforms3d.quaternions import quat2mat, mat2quat
 from sensor_msgs.msg import Imu, Image
 
+#################################################################
+#################################################################
+#################################################################
 def ros_point_to_carla_location(ros_point : Point) -> carla.Location:
     """
     Convert a ROS Point to a CARLA Location.
@@ -115,3 +118,19 @@ def ros_angular_velocity_to_carla_vector(ros_angular_velocity : Vector3) -> carl
         -ros_angular_velocity.y * 180 / math.pi,
         ros_angular_velocity.z * 180 / math.pi
     )
+    
+#################################################################
+#################################################################
+#################################################################
+
+def carla_vector_to_ros_vector3(carla_vector: carla.Vector3D) -> Vector3:
+    """
+    Convert a CARLA Vector3D to a ROS Vector3.
+    
+    Args:
+        carla_vector (carla.Vector3D): The CARLA Vector3D to convert.
+        
+    Returns:
+        Vector3: The converted ROS Vector3.
+    """
+    return Vector3(x=carla_vector.x, y=-carla_vector.y, z=carla_vector.z)

@@ -375,48 +375,14 @@ class DriveGuardNode(Node):
 ####################################################################
 ####################################################################
 
-    def set_twist(self, linear_x=0.0, linear_y=0.0, linear_z=0.0,
-                        angular_x=0.0, angular_y=0.0, angular_z=0.0):
+    def set_twist(self, twist: Twist):
         """
         Set twist under the local frame(base_link).
 
         Args:
-            linear_x (float): Linear velocity in x direction.
-            linear_y (float): Linear velocity in y direction.
-            linear_z (float): Linear velocity in z direction.
-            angular_x (float): Angular velocity around x axis.
-            angular_y (float): Angular velocity around y axis.
-            angular_z (float): Angular velocity around z axis.
+            twist (Twist): The twist message containing linear and angular velocities.
         """
-        twist_msg = Twist()
-        twist_msg.linear.x = linear_x
-        twist_msg.linear.y = linear_y
-        twist_msg.linear.z = linear_z
-        twist_msg.angular.x = angular_x
-        twist_msg.angular.y = angular_y
-        twist_msg.angular.z = angular_z
-
-        self.cmd_vel_publisher.publish(twist_msg)
-
-    def set_twist_ai(self, linear_x=0.0, linear_y=0.0, linear_z=0.0,
-                     angular_x=0.0, angular_y=0.0, angular_z=0.0):
-        """
-        Set twist under the local frame(base_link) for AI control.
-
-        Args:
-            linear_x (float): Linear velocity in x direction.
-            linear_y (float): Linear velocity in y direction.
-            linear_z (float): Linear velocity in z direction.
-            angular_x (float): Angular velocity around x axis.
-            angular_y (float): Angular velocity around y axis.
-            angular_z (float): Angular velocity around z axis.
-        """
-        twist_msg = Twist()
-        twist_msg.linear.x = linear_x
-        twist_msg.linear.y = linear_y
-        twist_msg.linear.z = linear_z
-        twist_msg.angular.x = angular_x
-        twist_msg.angular.y = angular_y
-        twist_msg.angular.z = angular_z
-
-        self.cmd_vel_ai_publisher.publish(twist_msg)
+        if twist is None:
+            self.get_logger().warn("Received None twist message, not publishing")
+            return
+        self.cmd_vel_publisher.publish(twist)

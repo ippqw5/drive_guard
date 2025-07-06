@@ -14,6 +14,7 @@ if __name__ == "__main__":
     ego_vehicle_id = carla.EGO_VEHICLE
     ego_vehicle = world.get_actor(ego_vehicle_id)
 
+    print(carla.BoundingBox(carla.Location(0, 0, 0), carla.Vector3D(1, 1, 1)))
     print(carla.Vector3D(1.0, 2.0, 3.0))
 
     try:
@@ -24,6 +25,8 @@ if __name__ == "__main__":
             print(f"Ego Vehicle Acceleration: {ego_vehicle.get_acceleration()}")
             print(f"Ego Vehicle Angular Velocity: {ego_vehicle.get_angular_velocity()}")
             print(f"Ego Vehicle Transform: {ego_vehicle.get_transform()}")
+
+            ego_vehicle.set_target_velocity(carla.Vector3D(0.2, 0, 0))
     except KeyboardInterrupt:
         print("\nKeyboard interrupt received")
     finally:
