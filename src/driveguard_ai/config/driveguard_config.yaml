@@ -1,0 +1,26 @@
+# DriveGuard-AI unified configuration
+
+
+# Data Collection Parameters
+data_collection:
+  topics_to_record:
+    - "/camera_sensor/image_raw"
+    - "/cmd_vel"
+  recording_duration: 30  # seconds, 0 for unlimited
+  max_bag_size: 1000  # MB
+  datasets_dir: "" # if empty, will use ./out/datasets
+  dataset_name: "" # if empty, will use dataset_<timestamp>
+
+# Model Training Parameters
+training:
+  batch_size: 32
+  learning_rate: 0.001
+  num_epochs: 20
+  val_split: 0.2
+  image_size: [224, 224]
+
+# Inference Parameters
+inference:
+  image_topic: "/camera_sensor/image_raw"
+  cmd_topic: "/cmd_vel"
+  device: "auto"  # "auto", "cuda", or "cpu"
