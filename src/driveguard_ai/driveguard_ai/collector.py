@@ -14,6 +14,8 @@ import subprocess
 import signal
 import time
 
+from .config import *
+
 class DriveGuardDataset(Dataset):
     """PyTorch dataset for DriveGuard images and commands"""
     
@@ -50,24 +52,17 @@ class DriveGuardDataset(Dataset):
 class DataRecorder:
     """Rosbag recorder that saves to organized dataset directories"""
     
-    def __init__(self, config_path=None):
-        # Load configuration
-        if not config_path:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'config', 'driveguard_config.yaml')
+    def __init__(self, dataset_name=None):
+        # Use configuration from config.py
+        self.data_config = DATA_COLLECTION
         
-        with open(config_path, 'r') as file:
-            config = yaml.safe_load(file)
-            self.data_config = config['data_collection']
-        
-        # Setup directories and names
-        self.datasets_dir = self.data_config['datasets_dir']
-        if not self.datasets_dir:
-            self.datasets_dir = "./out/datasets"
-        self.datasets_dir = os.path.expanduser(self.datasets_dir)
-        
-        self.dataset_name = self.data_config['dataset_name']
-        if not self.dataset_name:
+        # Fixed directory structure
+        self.datasets_dir = DATASETS_DIR
+
+        # Generate dataset name
+        if dataset_name:
+            self.dataset_name = dataset_name
+        else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.dataset_name = f"dataset_{timestamp}"
         
@@ -75,7 +70,6 @@ class DataRecorder:
         self.topics_to_record = self.data_config['topics_to_record']
         self.recording_duration = self.data_config['recording_duration']
         self.max_bag_size = self.data_config['max_bag_size']
-        
         
         self.recording_process = None
     
@@ -137,37 +131,23 @@ class DataRecorder:
 
 class DataProcessor:
     """Data processor for processing rosbag files in dataset directories"""
-    def __init__(self, config_path=None, dataset_name=None):
-        # Load configuration from YAML
-        if not config_path:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'config', 'driveguard_config.yaml')
+    
+    def __init__(self, dataset_name=None):
+        # Use configuration from config.py
+        self.data_config = DATA_COLLECTION
+        self.training_config = TRAINING
         
-        try:
-            with open(config_path, 'r') as file:
-                config = yaml.safe_load(file)
-                self.data_config = config['data_collection']
-                self.training_config = config['training']
-        except Exception as e:
-            print(f'Failed to load config: {str(e)}')
-            raise
-        
-        # Setup directories
-        self.datasets_dir = self.data_config['datasets_dir']
-        if not self.datasets_dir:
-            self.datasets_dir = "./out/datasets"
-        self.datasets_dir = os.path.expanduser(self.datasets_dir)
-        
+        # Fixed directory structure
+        self.datasets_dir = DATASETS_DIR
+
         # Determine dataset name
         if dataset_name:
             self.dataset_name = dataset_name
-        elif self.data_config['dataset_name']:
-            self.dataset_name = self.data_config['dataset_name']
         else:
             # Find the latest dataset directory
             self.dataset_name = self._find_latest_dataset()
             if not self.dataset_name:
-                raise FileNotFoundError('No dataset found. Please specify dataset_name or record data first.')
+                raise FileNotFoundError('No dataset found. Please specify --dataset-name or record data first.')
         
         self.dataset_path = os.path.join(self.datasets_dir, self.dataset_name)
         
@@ -182,7 +162,7 @@ class DataProcessor:
         # Extract image size from training config
         self.image_size = tuple(self.training_config['image_size'])
         
-        print(f'Data collector initialized with:')
+        print(f'Data processor initialized with:')
         print(f'  Dataset: {self.dataset_name}')
         print(f'  Dataset path: {self.dataset_path}')
         print(f'  Bag path: {self.bag_path}')
@@ -316,19 +296,19 @@ class DataProcessor:
             'image_size': self.image_size
         }, dataset_file)
         
-        # Save metadata
+        # Save metadata without YAML issues
         metadata = {
             'num_samples': len(images),
             'image_topic': self.data_config['topics_to_record'][0],
             'cmd_topic': self.data_config['topics_to_record'][1],
-            'image_size': self.image_size,
+            'image_size': list(self.image_size),  # Use list for JSON/YAML compatibility
             'source_bag': self.bag_path,
             'processed_at': datetime.now().strftime("%Y%m%d_%H%M%S")
         }
         
         metadata_file = os.path.join(self.dataset_path, 'dataset_metadata.yaml')
         with open(metadata_file, 'w') as f:
-            yaml.dump(metadata, f)
+            yaml.dump(metadata, f, default_flow_style=False)
         
         # Save sample images for visualization
         self._save_samples(images, commands)
@@ -383,19 +363,10 @@ class DataProcessor:
             raise
 
     @classmethod
-    def list_datasets(cls, config_path=None):
+    def list_datasets(cls):
         """List all available datasets"""
-        if not config_path:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'config', 'driveguard_config.yaml')
-        
-        with open(config_path, 'r') as file:
-            config = yaml.safe_load(file)
-            datasets_dir = config['data_collection']['datasets_dir']
-            if not datasets_dir:
-                datasets_dir = "./out/datasets"
-            datasets_dir = os.path.expanduser(datasets_dir)
-        
+        datasets_dir = DATASETS_DIR
+
         if not os.path.exists(datasets_dir):
             print(f"Datasets directory not found: {datasets_dir}")
             return []
@@ -434,20 +405,13 @@ def deserialize_message(data, topic_type):
 def record_main():
     """Main function for recording rosbags"""
     parser = argparse.ArgumentParser(description='Record ROS2 topics to organized dataset')
-    parser.add_argument('--config', help='Config file path')
     parser.add_argument('--dataset-name', help='Dataset name (will create directory)')
     parser.add_argument('--duration', type=int, help='Recording duration in seconds')
     
     args = parser.parse_args()
     
     try:
-        recorder = DataRecorder(args.config)
-        
-        # Override dataset name if provided
-        if args.dataset_name:
-            recorder.dataset_name = args.dataset_name
-            recorder.dataset_path = os.path.join(recorder.datasets_dir, recorder.dataset_name)
-            os.makedirs(recorder.dataset_path, exist_ok=True)
+        recorder = DataRecorder(args.dataset_name)
         
         # Override duration if provided
         if args.duration:
@@ -467,14 +431,13 @@ def record_main():
 def process_main():
     """Main function for processing datasets"""
     parser = argparse.ArgumentParser(description='Process rosbag data into training dataset')
-    parser.add_argument('--config', help='Config file path')
     parser.add_argument('--dataset-name', help='Dataset name to process')
     parser.add_argument('--list', action='store_true', help='List available datasets')
     
     args = parser.parse_args()
     
     if args.list:
-        datasets = DataProcessor.list_datasets(args.config)
+        datasets = DataProcessor.list_datasets()
         if datasets:
             print("Available datasets:")
             for dataset in datasets:
@@ -485,8 +448,8 @@ def process_main():
         return
     
     try:
-        collector = DataProcessor(args.config, args.dataset_name)
-        collector.process_dataset()
+        processor = DataProcessor(args.dataset_name)
+        processor.process_dataset()
         
     except KeyboardInterrupt:
         print('\nProcess interrupted by user')
@@ -504,9 +467,9 @@ if __name__ == "__main__":
         process_main()
     else:
         print("Usage:")
-        print("  python data_collection.py record [options]  - Record rosbag data")
-        print("  python data_collection.py process [options] - Process rosbag into dataset")
-        print("  python data_collection.py process --list    - List available datasets")
+        print("  python collector.py record_data [options]  - Record rosbag data")
+        print("  python collector.py process_data [options] - Process rosbag into dataset")
+        print("  python collector.py process_data --list    - List available datasets")
 
 
 

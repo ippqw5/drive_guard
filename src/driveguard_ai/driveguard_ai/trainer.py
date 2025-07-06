@@ -10,33 +10,23 @@ from datetime import datetime
 import yaml
 import argparse
 
-from driveguard_ai.models.resnet import DriveGuardResNet18
-from driveguard_ai.collector import DriveGuardDataset
+from .models.resnet import DriveGuardResNet18
+from .collector import DriveGuardDataset
+from .config import *
+
 
 class ModelTrainer:
     """Model trainer for DriveGuard neural network"""
     
-    def __init__(self, config_path=None, dataset_name=None):
-        # Load configuration from YAML
-        if not config_path:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'config', 'driveguard_config.yaml')
-        try:
-            with open(config_path, 'r') as file:
-                config = yaml.safe_load(file)
-                self.data_config = config['data_collection']
-                self.training_config = config['training']
-        except Exception as e:
-            print(f'Failed to load config: {str(e)}')
-            raise
-        
-        # Setup dataset directory from data_collection config
-        self.datasets_dir = self.data_config['datasets_dir']
-        if not self.datasets_dir:
-            self.datasets_dir = "./out/datasets"
-        self.datasets_dir = os.path.expanduser(self.datasets_dir)
-        
-        # Find dataset first to get dataset name
+    def __init__(self, dataset_name=None):
+        # Use configuration from config.py
+        self.training_config = TRAINING
+
+        # Fixed directory structure
+        self.datasets_dir = DATASETS_DIR
+        self.models_dir = MODELS_DIR
+
+        # Determine dataset name
         if dataset_name:
             self.dataset_name = dataset_name
             self.dataset_path = self._get_specific_dataset(dataset_name)
@@ -44,8 +34,7 @@ class ModelTrainer:
             self.dataset_name, self.dataset_path = self._find_latest_dataset()
         
         # Setup model save directory based on dataset name
-        out_dir = os.path.dirname(self.datasets_dir)  # Get parent of datasets dir (out/)
-        self.model_save_dir = os.path.join(out_dir, "models", self.dataset_name)
+        self.model_save_dir = os.path.join(self.models_dir, self.dataset_name)
         os.makedirs(self.model_save_dir, exist_ok=True)
         
         # Training parameters from config
@@ -59,7 +48,6 @@ class ModelTrainer:
         
         print(f"ModelTrainer initialized:")
         print(f"  Device: {self.device}")
-        print(f"  Datasets directory: {self.datasets_dir}")
         print(f"  Using dataset: {self.dataset_name}")
         print(f"  Dataset file: {self.dataset_path}")
         print(f"  Model save directory: {self.model_save_dir}")
@@ -319,26 +307,14 @@ class ModelTrainer:
         print(f'Training summary saved to {summary_path}')
 
     @classmethod
-    def list_available_datasets(cls, config_path=None):
+    def list_available_datasets(cls):
         """List all available processed datasets"""
-        if not config_path:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                'config', 'driveguard_config.yaml')
-    
-        with open(config_path, 'r') as file:
-            config = yaml.safe_load(file)
-            datasets_dir = config['data_collection']['datasets_dir']
-            if not datasets_dir:
-                datasets_dir = "./out/datasets"
-            datasets_dir = os.path.expanduser(datasets_dir)
-    
-        # Convert to absolute path for consistency
-        datasets_dir = os.path.abspath(datasets_dir)
-    
+        datasets_dir = DATASETS_DIR
+        
         if not os.path.exists(datasets_dir):
             print(f"Datasets directory not found: {datasets_dir}")
             return []
-    
+        
         datasets = []
         for item in os.listdir(datasets_dir):
             item_path = os.path.join(datasets_dir, item)
@@ -351,19 +327,9 @@ class ModelTrainer:
                     metadata = {}
                     if os.path.exists(metadata_file):
                         try:
-                            # Use safe_load but handle the tuple manually
                             with open(metadata_file, 'r') as f:
-                                content = f.read()
-                                # Replace the problematic python/tuple tag
-                                content = content.replace('!!python/tuple', '')
-                                metadata = yaml.safe_load(content)
-                            
-                            # Convert image_size back to tuple if it's a list
-                            if 'image_size' in metadata and isinstance(metadata['image_size'], list):
-                                metadata['image_size'] = tuple(metadata['image_size'])
-                                
+                                metadata = yaml.safe_load(f)
                         except Exception as e:
-                            print(f"Failed to load metadata for {item}: {e}")
                             metadata = {}
                     
                     # Get values with fallbacks
@@ -373,12 +339,10 @@ class ModelTrainer:
                     # If metadata is missing, try to get info from dataset file
                     if num_samples == 'Unknown':
                         try:
-                            # Load with weights_only=False to handle ROS messages
                             checkpoint = torch.load(dataset_file, map_location='cpu', weights_only=False)
                             if 'images' in checkpoint:
                                 num_samples = len(checkpoint['images'])
                         except Exception as e:
-                            print(f"Failed to load dataset file for {item}: {e}")
                             num_samples = 'Error'
                     
                     datasets.append({
@@ -388,14 +352,66 @@ class ModelTrainer:
                         'num_samples': num_samples,
                         'processed_at': processed_at
                     })
-    
+        
         return datasets
 
+    @classmethod
+    def list_available_models(cls, dataset_name=None):
+        """List all available trained models"""
+        models_dir = MODELS_DIR
+
+        if not os.path.exists(models_dir):
+            print(f"Models directory not found: {models_dir}")
+            return []
+        
+        models = []
+        
+        # If dataset_name is specified, only look in that directory
+        if dataset_name:
+            dataset_models_dir = os.path.join(models_dir, dataset_name)
+            if os.path.exists(dataset_models_dir):
+                models.extend(cls._scan_model_directory(dataset_models_dir, dataset_name))
+        else:
+            # Scan all dataset model directories
+            for item in os.listdir(models_dir):
+                item_path = os.path.join(models_dir, item)
+                if os.path.isdir(item_path):
+                    models.extend(cls._scan_model_directory(item_path, item))
+        
+        # Sort by dataset name and timestamp
+        models.sort(key=lambda x: (x['dataset_name'], x['timestamp']))
+        return models
+    
+    @classmethod
+    def _scan_model_directory(cls, model_dir, dataset_name):
+        """Scan a model directory for .pt files"""
+        models = []
+        for file in os.listdir(model_dir):
+            if file.endswith('.pt') and file != 'latest_model.pt':
+                model_path = os.path.join(model_dir, file)
+                try:
+                    # Load model metadata
+                    checkpoint = torch.load(model_path, map_location='cpu', weights_only=False)
+                    
+                    models.append({
+                        'dataset_name': dataset_name,
+                        'filename': file,
+                        'path': model_path,
+                        'timestamp': checkpoint.get('timestamp', 'Unknown'),
+                        'epochs': checkpoint.get('epochs', 'Unknown'),
+                        'final_train_loss': checkpoint.get('final_train_loss', 'Unknown'),
+                        'final_val_loss': checkpoint.get('final_val_loss', 'Unknown'),
+                        'batch_size': checkpoint.get('model_config', {}).get('batch_size', 'Unknown'),
+                        'learning_rate': checkpoint.get('model_config', {}).get('learning_rate', 'Unknown')
+                    })
+                except Exception as e:
+                    print(f"Failed to load model metadata from {model_path}: {e}")
+        
+        return models
 
 def main():
     """Main function for model trainer"""
     parser = argparse.ArgumentParser(description='Train DriveGuard neural network')
-    parser.add_argument('--config', help='Config file path')
     parser.add_argument('--dataset-name', help='Specific dataset name to use')
     parser.add_argument('--epochs', type=int, help='Number of training epochs')
     parser.add_argument('--batch-size', type=int, help='Training batch size')
@@ -406,7 +422,7 @@ def main():
     args = parser.parse_args()
     
     if args.list_datasets:
-        datasets = ModelTrainer.list_available_datasets(args.config)
+        datasets = ModelTrainer.list_available_datasets()
         if datasets:
             print("Available processed datasets:")
             print("-" * 50)
@@ -421,7 +437,7 @@ def main():
         return 0
     
     if args.list_models:
-        models = ModelTrainer.list_available_models(args.config, args.dataset_name)
+        models = ModelTrainer.list_available_models(args.dataset_name)
         if models:
             print("Available trained models:")
             print("-" * 60)
@@ -448,7 +464,7 @@ def main():
         return 0
     
     try:
-        trainer = ModelTrainer(args.config, args.dataset_name)
+        trainer = ModelTrainer(args.dataset_name)
         
         # Override parameters if provided
         if args.epochs:
