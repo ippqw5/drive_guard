@@ -17,14 +17,15 @@ from .config import *
 
 class ModelTrainer:
     """Model trainer for DriveGuard neural network"""
-    
-    def __init__(self, dataset_name=None):
+
+    def __init__(self, dataset_name=None, model_name=None):
         # Use configuration from config.py
         self.training_config = TRAINING
 
         # Fixed directory structure
         self.datasets_dir = DATASETS_DIR
         self.models_dir = MODELS_DIR
+        self.model_name = model_name if model_name else 'model'
 
         # Determine dataset name
         if dataset_name:
@@ -186,7 +187,7 @@ class ModelTrainer:
             
             # Save model with timestamp in filename
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            model_filename = f'model_{timestamp}.pt'
+            model_filename = f'{self.model_name}_{timestamp}.pt'
             model_save_path = os.path.join(self.model_save_dir, model_filename)
             
             # Save complete model checkpoint
@@ -413,6 +414,7 @@ def main():
     """Main function for model trainer"""
     parser = argparse.ArgumentParser(description='Train DriveGuard neural network')
     parser.add_argument('--dataset-name', help='Specific dataset name to use')
+    parser.add_argument('--model-name', help='Specific model name to use for training')
     parser.add_argument('--epochs', type=int, help='Number of training epochs')
     parser.add_argument('--batch-size', type=int, help='Training batch size')
     parser.add_argument('--learning-rate', type=float, help='Learning rate')
@@ -464,7 +466,7 @@ def main():
         return 0
     
     try:
-        trainer = ModelTrainer(args.dataset_name)
+        trainer = ModelTrainer(args.dataset_name, args.model_name)
         
         # Override parameters if provided
         if args.epochs:

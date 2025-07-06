@@ -3,7 +3,6 @@ import torch
 import cv2
 import numpy as np
 from cv_bridge import CvBridge
-import yaml
 
 import rclpy
 from rclpy.node import Node
@@ -11,49 +10,43 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 
 from driveguard_ai.models.resnet import DriveGuardResNet18
+from .config import *
 
 class InferenceNode(Node):
     def __init__(self):
         super().__init__('driveguard_inference')
         
-        # Load configuration from YAML
-        self.declare_parameter('config_file', '')
-        config_path = self.get_parameter('config_file').value
-        if not config_path:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'config', 'driveguard_config.yaml')
-        try:
-            with open(config_path, 'r') as file:
-                config = yaml.safe_load(file)
-                infer_config = config['inference']
-                self.global_config = config
-        except Exception as e:
-            self.get_logger().error(f'Failed to load config: {str(e)}')
+        # Declare model name parameter
+        self.declare_parameter('model_name', '')
+        model_name = self.get_parameter('model_name').value
+        
+        if not model_name:
+            self.get_logger().error('model_name parameter is required')
             return
         
-        # Parameters from config using global paths
-        self.model_dir = os.path.expanduser(self.global_config['model_dir'])
-        self.image_topic = infer_config['image_topic']
-        self.cmd_topic = infer_config['cmd_topic']
+        # Use config.py parameters
+        self.model_dir = MODELS_DIR
+        self.image_topic = INFERENCE['image_topic']
+        self.cmd_topic = INFERENCE['cmd_topic']
         
-        # Find the latest model
-        self.model_path = self._find_latest_model()
+        # Build model path from model name
+        self.model_path = os.path.join(self.model_dir, f"{model_name}.pt")
         
-        if not self.model_path:
-            self.get_logger().error('No model files found')
+        if not os.path.exists(self.model_path):
+            self.get_logger().error(f'Model file not found: {self.model_path}')
             return
         
         # Determine device
-        if infer_config['device'] == 'auto':
+        if INFERENCE['device'] == 'auto':
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         else:
-            self.device = torch.device(infer_config['device'])
+            self.device = torch.device(INFERENCE['device'])
         
         # Publishers and subscribers
         self.cmd_publisher = self.create_publisher(Twist, self.cmd_topic, 10)
         self.image_subscription = self.create_subscription(
             Image,
-            self.image_topic,
+            self.image_topic, # /camera_sensor/image_raw
             self.image_callback,
             10)
         
@@ -64,28 +57,8 @@ class InferenceNode(Node):
         self.model = None
         self.load_model()
         
-        self.get_logger().info(f'DriveGuard Inference Node started, subscribing to {self.image_topic}, publishing to {self.cmd_topic}')
-    
-    def _find_latest_model(self):
-        """Find the latest model file in the model directory"""
-        if not os.path.exists(self.model_dir):
-            self.get_logger().error(f'Model directory does not exist: {self.model_dir}')
-            return None
-            
-        # Look for model files
-        model_files = []
-        for item in os.listdir(self.model_dir):
-            if item.endswith('.pt') and item.startswith('driveguard_model_'):
-                model_files.append(os.path.join(self.model_dir, item))
-        
-        if not model_files:
-            self.get_logger().error(f'No model files found in {self.model_dir}')
-            return None
-            
-        # Return the latest model file based on name (timestamp)
-        latest_model = max(model_files, key=lambda x: os.path.basename(x))
-        self.get_logger().info(f'Using latest model: {latest_model}')
-        return latest_model
+        self.get_logger().info(f'DriveGuard Inference Node started, using model: {model_name}')
+        self.get_logger().info(f'Subscribing to {self.image_topic}, publishing to {self.cmd_topic}')
     
     def load_model(self):
         """Load the trained PyTorch model"""
@@ -122,8 +95,9 @@ class InferenceNode(Node):
             # Convert ROS Image to CV2 image
             cv_image = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
             
-            # Preprocess image
-            cv_image = cv2.resize(cv_image, (224, 224))
+            # Preprocess image using config
+            image_size = TRAINING['image_size']
+            cv_image = cv2.resize(cv_image, tuple(image_size))
             
             # Convert to PyTorch tensor
             image_tensor = torch.from_numpy(cv_image.transpose((2, 0, 1))).float() / 255.0

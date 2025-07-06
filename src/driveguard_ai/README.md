@@ -37,7 +37,7 @@ ros2 run driveguard_ai process_data --list
 
 ```sh
 # 训练模型
-ros2 run driveguard_ai train_model --dataset-name my_dataset
+ros2 run driveguard_ai train_model --dataset-name my_dataset --model-name my_model
 ```
 
 ![alt text](media/image.png)
@@ -45,5 +45,5 @@ ros2 run driveguard_ai train_model --dataset-name my_dataset
 
 ### Inference Node
 ```sh
-ros2 launch driveguard_ai inference_node.launch.py
+ros2 run driveguard_ai inference --model-name my_model
 ```

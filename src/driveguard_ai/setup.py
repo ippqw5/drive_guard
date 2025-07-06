@@ -39,6 +39,7 @@ setup(
             'record_data = driveguard_ai.collector:record_main',
             'process_data = driveguard_ai.collector:process_main',
             'train_model = driveguard_ai.trainer:main',
+            'inference = driveguard_ai.inferencer:main',
         ],
     },
 )          
