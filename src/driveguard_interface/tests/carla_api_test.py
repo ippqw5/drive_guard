@@ -1,9 +1,9 @@
 import sys
 import os
 import time
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-  
-import driveguard.carla as carla
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import driveguard_interface.driveguard_carla as carla
 
 if __name__ == "__main__":
 

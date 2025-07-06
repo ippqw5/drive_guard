@@ -22,7 +22,7 @@ Here is a sample code snippet to get you started:
 
 .. code-block:: python
 
-   import driveguard.carla as carla
+   import driveguard_interface.driveguard_carla as carla
 
    client = carla.Client()
    

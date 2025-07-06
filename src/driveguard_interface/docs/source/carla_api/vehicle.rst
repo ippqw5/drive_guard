@@ -1,7 +1,7 @@
-driveguard_vehicle
+vehicle
 =========================
 
-.. automodule:: driveguard.carla.driveguard_vehicle
+.. automodule:: driveguard_interface.driveguard_carla.vehicle
    :members:
    :undoc-members:
    :show-inheritance:

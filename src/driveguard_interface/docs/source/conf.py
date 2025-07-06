@@ -5,7 +5,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -29,8 +29,8 @@ extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = [
-    'driveguard.carla.rst',
-    'driveguard.rst',
+    'driveguard_interface.driveguard_carla.rst',
+    'driveguard_interface.rst',
     'modules.rst',
 ]
 

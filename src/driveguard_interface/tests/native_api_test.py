@@ -2,9 +2,9 @@ import sys
 import os
 import time
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
   
-from driveguard import DriveGuardNode
+from driveguard_interface.driveguard_node import DriveGuardNode
 
 
 def image_test(node : DriveGuardNode):

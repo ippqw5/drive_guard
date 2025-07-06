@@ -1,7 +1,7 @@
-driveguard
-==========
+driveguard_interface
+====================
 
 .. toctree::
    :maxdepth: 4
 
-   driveguard
+   driveguard_interface

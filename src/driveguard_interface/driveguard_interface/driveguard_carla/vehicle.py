@@ -1,8 +1,8 @@
 import math
 import carla
 
-from .driveguard_carla_bridge import *
-from .driveguard_actor import Actor
+from .ros_carla_bridge import *
+from .actor import Actor
 
 class Vehicle(Actor):
     """

@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from carla import Vector3D, Rotation, Location, Transform
 
 from ..driveguard_node import DriveGuardNode
-from .driveguard_actor import Actor
-from .driveguard_vehicle import Vehicle
-from .driveguard_sensor import Sensor
+from .actor import Actor
+from .vehicle import Vehicle
+from .sensor import Sensor
 
 
 EGO_VEHICLE = int(0)

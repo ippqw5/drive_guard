@@ -1,7 +1,7 @@
-driveguard_actor
+actor
 =======================
 
-.. automodule:: driveguard.carla.driveguard_actor
+.. automodule:: driveguard_interface.driveguard_carla.actor
    :members:
    :undoc-members:
    :show-inheritance:

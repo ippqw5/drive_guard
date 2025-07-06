@@ -8,7 +8,7 @@ rm -rf build
 mkdir -p source/_static
 
 # 生成 API 文档
-sphinx-apidoc -o source ../src/driveguard
+sphinx-apidoc -o source ../driveguard_interface
 
 # 构建 HTML 文档
 make html
