@@ -30,6 +30,7 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = [
     'driveguard_interface.driveguard_carla.rst',
+    'driveguard_interface.common.rst',
     'driveguard_interface.rst',
     'modules.rst',
 ]

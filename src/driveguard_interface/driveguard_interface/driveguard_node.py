@@ -5,7 +5,6 @@ import time
 import torch
 import cv2
 import cv_bridge
-
 import rclpy
 from rclpy.node import Node
 from tf2_ros import *
@@ -13,6 +12,9 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, Image
 from geometry_msgs.msg import Pose, Transform, Twist, Vector3, Accel
 
+from .settings import *
+
+_drive_guard_node_instance = None
 
 class DriveGuardNode(Node):
     """
@@ -22,15 +24,32 @@ class DriveGuardNode(Node):
 
     This class should be singleton in the application, as it manages the ROS2 node lifecycle. 
     """
+
+    @staticmethod
+    def get_instance():
+        """
+        Get the singleton instance of DriveGuardNode.
+        
+        Returns:
+            DriveGuardNode: The singleton instance of DriveGuardNode.
+        """
+        global _drive_guard_node_instance
+        if _drive_guard_node_instance is None:
+            _drive_guard_node_instance = DriveGuardNode()
+        return _drive_guard_node_instance
+
     def __init__(self):
-        rclpy.init()
+        try:
+            rclpy.init()
+        except RuntimeError:
+            pass # Ignore if already initialized
         super().__init__('drive_guard_node')
 
-        self.imu_topic_name = '/imu'
-        self.camera_topic_name = '/camera_sensor/image_raw'
-        self.odom_topic_name = '/odom'
-        self.cmd_vel_topic_name = '/cmd_vel'
-        self.cmd_vel_ai_topic_name = '/cmd_vel_ai'
+        self.imu_topic_name = TOPIC_IMU_NAME
+        self.image_topic_name = TOPIC_IMAGE_NAME
+        self.odom_topic_name = TOPIC_ODOM_NAME
+        self.cmd_vel_topic_name = TOPIC_CMD_VEL_NAME
+        self.cmd_vel_ai_topic_name = TOPIC_CMD_VEL_AI_NAME
 
         self.latest_imu_data : Imu = None
         self.latest_raw_image : Image = None
@@ -47,7 +66,7 @@ class DriveGuardNode(Node):
         )
         self.create_subscription(
             Image,
-            self.camera_topic_name,
+            self.image_topic_name,
             self._image_callback,
             10
         )
@@ -100,15 +119,15 @@ class DriveGuardNode(Node):
         publishers = self.get_publishers_info_by_topic(self.imu_topic_name)
         imu_exists = len(publishers) > 0
 
-        publishers = self.get_publishers_info_by_topic(self.camera_topic_name)
+        publishers = self.get_publishers_info_by_topic(self.image_topic_name)
         camera_exists = len(publishers) > 0
 
         publishers = self.get_publishers_info_by_topic(self.odom_topic_name)
         odom_exists = len(publishers) > 0
-        
-        self.get_logger().warn(f"IMU topic exists: {imu_exists}")
-        self.get_logger().warn(f"Camera topic exists: {camera_exists}")
-        self.get_logger().warn(f"Odom topic exists: {odom_exists}")
+
+        self.get_logger().warn(f"Topic {TOPIC_IMU_NAME} exists: {imu_exists}")
+        self.get_logger().warn(f"Topic {TOPIC_IMAGE_NAME} exists: {camera_exists}")
+        self.get_logger().warn(f"Topic {TOPIC_ODOM_NAME} exists: {odom_exists}")
 
         return imu_exists, camera_exists, odom_exists
     
@@ -117,7 +136,7 @@ class DriveGuardNode(Node):
 ####################################################################
 
     def stop(self):
-        self.set_twist(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        self.set_twist(Twist())
     
     def shutdown(self):
         self.get_logger().warn("Destroying")

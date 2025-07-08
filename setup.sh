@@ -1,7 +1,7 @@
 # ROS2 domain id for network communication, machines with the same ID will receive each others' messages
-export ROS_DOMAIN_ID=1
+export ROS_DOMAIN_ID=0
 
-WORKSPACE_DIR=$(pwd) # or set to your workspace path
+export WORKSPACE_DIR=$(pwd) # or set to your workspace path
 
 export DRLNAV_BASE_PATH=$WORKSPACE_DIR/src/driveguard_drlnav
 

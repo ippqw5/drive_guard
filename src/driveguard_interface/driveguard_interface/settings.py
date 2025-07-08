@@ -1,0 +1,5 @@
+TOPIC_IMU_NAME = '/imu'
+TOPIC_IMAGE_NAME = '/camera_sensor/image_raw'
+TOPIC_ODOM_NAME = '/odom'
+TOPIC_CMD_VEL_NAME = '/cmd_vel'
+TOPIC_CMD_VEL_AI_NAME = '/cmd_vel_ai'

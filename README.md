@@ -1,4 +1,3 @@
-
 # DriveGuard
 
 ## 1.项目介绍
@@ -51,6 +50,9 @@ pip3 install opencv-python
 
 # calar python api
 pip3 install carla
+
+# 视觉控制相关依赖
+pip3 install torch torchvision torchaudio matplotlib tensorboard tqdm
 ```
 
 ### 2.2 运行Nav2导航
@@ -138,6 +140,111 @@ ros2 launch driveguard_navigation2 nav2_racecar.launch.py # :use_arbitrator=true
     ```
 
 详见 [driveguard_drlnav](src/driveguard_drlnav/README.md)
+
+### 2.4 视觉控制
+
+基于深度学习的端到端视觉控制功能，通过摄像头图像直接预测机器人的运动控制命令。
+
+#### 2.4.1 数据收集
+
+首先需要收集训练数据，通过"手动/Nav2"控制机器人收集图像和对应的控制命令：
+
+```bash
+# 记录数据 (默认10秒)
+ros2 run driveguard_interface vision_control record --duration 30
+
+# 指定输出目录和包名
+ros2 run driveguard_interface vision_control record --duration 30 --out_dir ~/my_data --bag_name manual_control_data
+```
+
+#### 2.4.2 数据集生成
+
+从录制的ROS2 bag文件生成训练数据集：
+
+```bash
+# 从bag文件生成数据集
+ros2 run driveguard_interface vision_control generate --name my_dataset
+
+# 指定特定的bag文件
+ros2 run driveguard_interface vision_control generate --name my_dataset --bag /path/to/bag/file
+```
+
+#### 2.4.3 模型训练
+
+使用生成的数据集训练视觉控制模型：
+
+```bash
+# 训练模型
+ros2 run driveguard_interface vision_control train --dataset my_dataset --model_name my_model --epochs 100
+
+# 指定更多训练参数
+ros2 run driveguard_interface vision_control train --dataset my_dataset --model_name my_model --epochs 200 --batch_size 64 --learning_rate 0.0001
+```
+
+#### 2.4.4 模型评估
+
+评估训练好的模型性能：
+
+```bash
+# 评估模型
+ros2 run driveguard_interface vision_control evaluate --model my_model --dataset my_dataset
+```
+
+#### 2.4.5 实时推理
+
+使用训练好的模型进行实时视觉控制：
+
+```bash
+# 启动实时推理 (交互式选择模型)
+ros2 run driveguard_interface vision_control inference
+
+# 指定模型名称
+ros2 run driveguard_interface vision_control inference --model my_model
+
+# 自定义参数
+ros2 run driveguard_interface vision_control inference --model my_model --rate 20 --max_linear 0.8 --max_angular 1.5
+```
+
+#### 2.4.6 单张图像测试
+
+测试模型对单张图像的预测：
+
+```bash
+# 测试单张图像预测
+ros2 run driveguard_interface vision_control test --model my_model --image /path/to/image.jpg
+```
+
+#### 2.4.7 查看可用资源
+
+查看所有可用的数据集、模型和bag文件：
+
+```bash
+# 列出所有可用资源
+ros2 run driveguard_interface vision_control list
+```
+
+#### 2.4.8 输出目录结构
+
+视觉控制系统的输出目录结构如下：
+
+```
+~/.driveguard/
+├── datasets/
+│   └── {DATASET_NAME}/
+│       ├── images/
+│       ├── data.csv
+│       └── metadata.json
+├── ros2bags/
+│   └── {BAG_NAME}/
+│       ├── {BAG_NAME}_0.db3
+│       └── metadata.yaml
+└── models/
+    └── {MODEL_NAME}/
+        ├── metrics/           # 训练指标图表
+        ├── checkpoints/       # 模型检查点
+        ├── best_model.pth     # 最佳模型
+        └── metadata.json      # 训练元数据
+```
 
 ## 3.常用命令
 
