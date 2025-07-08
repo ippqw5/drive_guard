@@ -1,0 +1,17 @@
+Batch Size: 1024
+Buffer Size: 1000000
+State Size: 44
+Action Size: 2
+Hidden Size: 512
+Discount Factor: 0.99
+Learning Rate: 0.0003
+Tau: 0.0003
+Step Time: 0.0
+Actor Optimizer: AdamW
+Critic Optimizer: AdamW
+Loss Function: smooth_l1_loss
+Reward Function: G
+Enable Backward: False
+Sim Speed: 3
+Enable Stacking: False
+Alpha Start: 3

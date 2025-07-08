@@ -7,7 +7,7 @@ colcon build
 ### 运行
 ```
 source install/setup.bash
-ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py 
+ros2 launch driveguard_gazebo gazebo_sim_diff_drive.launch.py 
 
 source install/setup.bash
 ros2 launch driveguard_cartographer cartographer.launch.py

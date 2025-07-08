@@ -4,11 +4,13 @@
 ## 1.项目介绍
 
 各功能包功能如下：
-- driveguard_description 机器人模型的描述文件，包含仿真相关配置
+- driveguard_gazebo 仿真相关功能包
 - driveguard_cartographer 建图与定位配置
 - driveguard_navigation2 导航配置
 - driveguard_interface  提供易用的对外接口，屏蔽ros细节
-
+- driveguard_arbitrator  仲裁节点，提供多种导航算法的切换
+- driveguard_ai AI相关功能包
+- driveguard_drlnav 基于强化学习的导航功能包，使用turtlebot3作为测试平台
 
 ## 2.使用方法   
 
@@ -51,51 +53,91 @@ pip3 install opencv-python
 pip3 install carla
 ```
 
-### 2.2运行
+### 2.2 运行Nav2导航
 
 安装完成依赖后，可以使用 colcon 工具进行构建和运行。
 
-构建功能包
-
+- 构建功能包
 ```
 colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 ```
 
-运行仿真
-
+- 运行仿真
 ```
 #两轮差速
-source install/setup.bash
-ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py 
+source setup.sh
+ros2 launch driveguard_gazebo gazebo_sim_diff_drive.launch.py 
 
 #阿克曼
-source install/setup.bash
-ros2 launch driveguard_description gazebo_sim_racecar.launch.py 
+source setup.sh
+ros2 launch driveguard_gazebo gazebo_sim_racecar.launch.py
 ```
 
-运行cartographer
-
+- 运行cartographer
 ```
-source install/setup.bash
+source setup.sh
 ros2 launch driveguard_cartographer cartographer.launch.py
 ```
 
-运行导航
-
+- 运行导航
 ```
 #两轮差速
-source install/setup.bash
+source setup.sh
 # option:use_arbitrator 启用仲裁节点
 ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py # :use_arbitrator=true
 
 #阿克曼
-source install/setup.bash
+source setup.sh
 # option:use_arbitrator
 ros2 launch driveguard_navigation2 nav2_racecar.launch.py # :use_arbitrator=true
 ```
 
 ![sim_ackermann](media/sim_ackermann.png)
 
+### 2.3 运行强化学习导航
+
+<p float="left">
+ <img src="src/driveguard_drlnav/media/simulation.gif" width="400">
+ <img src="src/driveguard_drlnav/media/physical_demo.gif" width="216" alt="physical_demo.gif" />
+</p>
+
+- 启动gazebo
+    ```
+    source setup.sh
+    ros2 launch turtlebot3_gazebo turtlebot3_drl_stage4.launch.py
+    ```
+
+- 启动强化学习环境
+    ```
+    source setup.sh
+    ros2 run turtlebot3_drl environment
+    ```
+
+- 目标点发布
+    ```
+    source setup.sh
+    ros2 run turtlebot3_drl gazebo_goals
+    ```
+
+- 强化学习训练
+
+    For DDPG:
+    ```
+    source setup.sh
+    ros2 run turtlebot3_drl train_agent ddpg
+    ```
+
+    for TD3:
+    ```
+    ros2 run turtlebot3_drl train_agent td3
+    ```
+
+    for DQN:
+    ```
+    ros2 run turtlebot3_drl train_agent dqn
+    ```
+
+详见 [driveguard_drlnav](src/driveguard_drlnav/README.md)
 
 ## 3.常用命令
 

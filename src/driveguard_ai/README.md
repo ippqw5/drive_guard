@@ -21,7 +21,7 @@ source install/setup.bash
 ```sh
 
 
-ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py #两轮差速，上面有摄像头，发布/camera_sensor/image_raw
+ros2 launch driveguard_gazebo gazebo_sim_diff_drive.launch.py #两轮差速，上面有摄像头，发布/camera_sensor/image_raw
 ros2 run teleop_twist_keyboard teleop_twist_keyboard #随便按几下，发布/cmd_vel
 
 # 记录数据

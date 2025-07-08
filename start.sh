@@ -27,10 +27,10 @@ source install/setup.bash
 # 在后台启动gazebo仿真，根据 -a 参数决定启动哪个仿真
 if $use_ackermann; then
     # 启动 ackermann 仿真
-    ros2 launch driveguard_description gazebo_sim_racecar.launch.py &
+    ros2 launch driveguard_gazebo gazebo_sim_racecar.launch.py &
 else
     # 启动 diff_drive 仿真
-    ros2 launch driveguard_description gazebo_sim_diff_drive.launch.py &
+    ros2 launch driveguard_gazebo gazebo_sim_diff_drive.launch.py &
 fi
 
 # 等待一段时间确保gazebo完全启动
