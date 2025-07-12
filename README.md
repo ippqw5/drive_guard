@@ -228,7 +228,7 @@ ros2 run driveguard_interface vision_control list
 视觉控制系统的输出目录结构如下：
 
 ```
-~/.driveguard/
+out/
 ├── datasets/
 │   └── {DATASET_NAME}/
 │       ├── images/
