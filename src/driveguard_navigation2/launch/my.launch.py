@@ -21,9 +21,10 @@ def generate_launch_description():
     launch_dir = os.path.join(bringup_dir, 'launch')
 
     my_bringup_dir = get_package_share_directory('driveguard_navigation2')
-    my_launch_dir = os.path.join(bringup_dir, 'launch')
+    my_launch_dir = os.path.join(my_bringup_dir, 'launch')
 
-    arbitrator_dir = get_package_share_directory('driveguard_arbitrator_py')
+    # arbitrator_dir = get_package_share_directory('driveguard_arbitrator_py')
+    arbitrator_dir = get_package_share_directory('driveguard_arbitrator')
     arbitrator_launch_dir = os.path.join(arbitrator_dir, 'launch')
  
  
@@ -135,8 +136,12 @@ def generate_launch_description():
                               'container_name': 'nav2_container'}.items(),
             condition=IfCondition(use_arbitrator)
                               ),
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(os.path.join(arbitrator_launch_dir,'driveguard_arbitrator_py.launch.py')),
+        #     condition=IfCondition(use_arbitrator)
+        #                       ),
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(arbitrator_launch_dir,'driveguard_arbitrator_py.launch.py')),
+            PythonLaunchDescriptionSource(os.path.join(arbitrator_launch_dir,'driveguard_arbitrator.launch.py')),
             condition=IfCondition(use_arbitrator)
                               ),
     ])
