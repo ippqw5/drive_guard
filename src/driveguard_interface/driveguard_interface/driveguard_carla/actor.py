@@ -1,4 +1,4 @@
-import carla
+from .carla_types import Vector3D, Location, Transform
 from abc import ABC, abstractmethod
 
 class Actor(ABC):
@@ -7,59 +7,52 @@ class Actor(ABC):
     """
     
     @abstractmethod
-    def get_transform(self) -> carla.Transform:
+    def get_transform(self) -> Transform:
         """
         Get the transform of the actor.
         
         Returns:
-            carla.Transform: The transform of the actor.
+            Transform: The transform of the actor.
         """
         pass
 
     @abstractmethod
-    def get_location(self) -> carla.Location:
+    def get_location(self) -> Location:
         """
         Get the location of the actor.
         
         Returns:
-            carla.Location: The location of the actor.
+            Location: The location of the actor.
         """
         pass
     
     @abstractmethod
-    def get_velocity(self) -> carla.Vector3D:
+    def get_velocity(self) -> Vector3D:
         """
         Get the velocity of the actor.
         
         Returns:
-            carla.Vector3D: The velocity of the actor.
+            Vector3D: The velocity of the actor.
         """
         pass
 
     @abstractmethod
-    def get_angular_velocity(self) -> carla.Vector3D:
+    def get_angular_velocity(self) -> Vector3D:
         """
         Get the angular velocity of the actor.
 
         Returns:
-            carla.Vector3D: The angular velocity of the actor.
-        """
-        pass
-        """
-        Get the angular velocity of the actor.
-        
-        Returns:
-            carla.Vector3D: The angular velocity of the actor.
+            Vector3D: The angular velocity of the actor.
         """
         pass
     
     @abstractmethod
-    def get_acceleration(self) -> carla.Vector3D:
+    def get_acceleration(self) -> Vector3D:
         """
         Get the acceleration of the actor.
         
         Returns:
-            carla.Vector3D: The acceleration of the actor.
+            Vector3D: The acceleration of the actor.
         """
         pass
     
@@ -82,12 +75,12 @@ class Actor(ABC):
         """
         return True
     
-    def set_location(self, location: carla.Location):
+    def set_location(self, location: Location):
         """
         Teleports the actor to a given location.
         
         Args:
-            location (carla.Location): The new location of the actor.
+            location (Location): The new location of the actor.
         """
         raise NotImplementedError("This method can not be implemented on DriveGuard.")
     
@@ -101,30 +94,30 @@ class Actor(ABC):
         return True
     
     @abstractmethod
-    def set_target_angular_velocity(self, angular_velocity: carla.Vector3D):
+    def set_target_angular_velocity(self, angular_velocity: Vector3D):
         """
         Sets the actor's angular velocity vector. This is applied before the physics step so the resulting angular velocity will be affected by external forces such as friction.
         
         Args:
-            angular_velocity (carla.Vector3D): The target angular velocity in degrees per second.
+            angular_velocity (Vector3D): The target angular velocity in degrees per second.
         """
         pass
     
     @abstractmethod
-    def set_target_velocity(self, velocity: carla.Vector3D):
+    def set_target_velocity(self, velocity: Vector3D):
         """
         Sets the actor's velocity vector. This is applied before the physics step so the resulting angular velocity will be affected by external forces such as friction.
         
         Args:
-            velocity (carla.Vector3D): The target velocity.
+            velocity (Vector3D): The target velocity.
         """
         pass
     
-    def set_transform(self, transform: carla.Transform):
+    def set_transform(self, transform: Transform):
         """
         Teleports the actor to a given transform (location and rotation).
         
         Args:
-            transform (carla.Transform): The new transform of the actor.
+            transform (Transform): The new transform of the actor.
         """
         raise NotImplementedError("This method can not be implemented on DriveGuard.")

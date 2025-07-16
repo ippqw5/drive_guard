@@ -1,8 +1,23 @@
 # 导入所有模块中的类和函数
-from .world import *
-from .actor import *
-from .sensor import *
-from .vehicle import *
-from .ros_carla_bridge import *
+from .world import World, Client, EGO_VEHICLE, EGO_IMU, EGO_CAMERA, EGO_LIDAR
+from .actor import Actor
+from .vehicle import Vehicle
+from .sensor import Sensor
+from .carla_types import Vector3D, Location, Rotation, Transform, BoundingBox
 
-from carla import Vector2D, Vector3D, Transform, Location, Rotation, BoundingBox, Color
+__all__ = [
+    'World',
+    'Client', 
+    'Actor',
+    'Vehicle',
+    'Sensor',
+    'Vector3D',
+    'Location', 
+    'Rotation',
+    'Transform',
+    'BoundingBox',
+    'EGO_VEHICLE',
+    'EGO_IMU',
+    'EGO_CAMERA',
+    'EGO_LIDAR'
+]

@@ -4,10 +4,10 @@ import math
 import numpy
 import time
 
-import carla
+from .carla_types import Vector3D, Location, Rotation, Transform
 
 import rclpy
-from geometry_msgs.msg import Vector3, Quaternion, Transform, Pose, Point, Twist, Accel
+from geometry_msgs.msg import Vector3, Quaternion, Transform as RosTransform, Pose, Point, Twist, Accel
 from transforms3d.euler import euler2mat, quat2euler, euler2quat
 from transforms3d.quaternions import quat2mat, mat2quat
 from sensor_msgs.msg import Imu, Image
@@ -15,7 +15,7 @@ from sensor_msgs.msg import Imu, Image
 #################################################################
 #################################################################
 #################################################################
-def ros_point_to_carla_location(ros_point : Point) -> carla.Location:
+def ros_point_to_carla_location(ros_point : Point) -> Location:
     """
     Convert a ROS Point to a CARLA Location.
     
@@ -23,12 +23,12 @@ def ros_point_to_carla_location(ros_point : Point) -> carla.Location:
         ros_point (Point): The ROS Point to convert.
     
     Returns:
-        carla.Location: The converted CARLA Location.
+        Location: The converted CARLA Location.
     """
-    return carla.Location(ros_point.x, -ros_point.y, ros_point.z)
+    return Location(ros_point.x, -ros_point.y, ros_point.z)
 
 
-def RPY_to_carla_rotation(roll, pitch, yaw) -> carla.Rotation:
+def RPY_to_carla_rotation(roll, pitch, yaw) -> Rotation:
     """
     Convert roll, pitch, yaw angles to a CARLA Rotation.
     
@@ -38,14 +38,14 @@ def RPY_to_carla_rotation(roll, pitch, yaw) -> carla.Rotation:
         yaw (float): Yaw angle in radians.
         
     Returns:
-        carla.Rotation: The CARLA Rotation object.
+        Rotation: The CARLA Rotation object.
     """
-    return carla.Rotation(roll=math.degrees(roll),
-                          pitch=-math.degrees(pitch),
-                          yaw=-math.degrees(yaw))
+    return Rotation(roll=math.degrees(roll),
+                    pitch=-math.degrees(pitch),
+                    yaw=-math.degrees(yaw))
 
 
-def ros_quaternion_to_carla_rotation(ros_quaternion : Quaternion) -> carla.Rotation:
+def ros_quaternion_to_carla_rotation(ros_quaternion : Quaternion) -> Rotation:
     """
     Convert a ROS Quaternion to a CARLA Rotation.
     
@@ -53,7 +53,7 @@ def ros_quaternion_to_carla_rotation(ros_quaternion : Quaternion) -> carla.Rotat
         ros_quaternion (Quaternion): The ROS Quaternion to convert.
     
     Returns:
-        carla.Rotation: The converted CARLA Rotation.
+        Rotation: The converted CARLA Rotation.
     """
     roll, pitch, yaw = quat2euler([ros_quaternion.w,
                                    ros_quaternion.x,
@@ -61,7 +61,7 @@ def ros_quaternion_to_carla_rotation(ros_quaternion : Quaternion) -> carla.Rotat
                                    ros_quaternion.z])
     return RPY_to_carla_rotation(roll, pitch, yaw)
 
-def ros_transform_to_carla_transform(ros_transform : Transform) -> carla.Transform:
+def ros_transform_to_carla_transform(ros_transform : RosTransform) -> Transform:
     """
     Convert a ROS Transform to a CARLA Transform.
     
@@ -69,13 +69,13 @@ def ros_transform_to_carla_transform(ros_transform : Transform) -> carla.Transfo
         ros_transform (Transform): The ROS Transform to convert.
         
     Returns:
-        carla.Transform: The converted CARLA Transform.
+        Transform: The converted CARLA Transform.
     """
-    return carla.Transform(
+    return Transform(
         ros_point_to_carla_location(ros_transform.translation),
         ros_quaternion_to_carla_rotation(ros_transform.rotation))
 
-def ros_pose_to_carla_transform(ros_pose : Pose) -> carla.Transform:
+def ros_pose_to_carla_transform(ros_pose : Pose) -> Transform:
     """
     Convert a ROS Pose to a CARLA Transform.
     
@@ -83,14 +83,14 @@ def ros_pose_to_carla_transform(ros_pose : Pose) -> carla.Transform:
         ros_pose (Pose): The ROS Pose to convert.
         
     Returns:
-        carla.Transform: The converted CARLA Transform.
+        Transform: The converted CARLA Transform.
     """
-    return carla.Transform(
+    return Transform(
         ros_point_to_carla_location(ros_pose.position),
         ros_quaternion_to_carla_rotation(ros_pose.orientation))
 
 
-def ros_vector3_to_carla_vector(ros_vector : Vector3) -> carla.Vector3D:
+def ros_vector3_to_carla_vector(ros_vector : Vector3) -> Vector3D:
     """
     Convert a ROS Vector3 to a CARLA Vector3D.
     
@@ -98,12 +98,12 @@ def ros_vector3_to_carla_vector(ros_vector : Vector3) -> carla.Vector3D:
         ros_vector (Vector3): The ROS Vector3 to convert.
         
     Returns:
-        carla.Vector3D: The converted CARLA Vector3D.
+        Vector3D: The converted CARLA Vector3D.
     """
-    return carla.Vector3D(ros_vector.x, -ros_vector.y, ros_vector.z)
+    return Vector3D(ros_vector.x, -ros_vector.y, ros_vector.z)
 
 
-def ros_angular_velocity_to_carla_vector(ros_angular_velocity : Vector3) -> carla.Vector3D:
+def ros_angular_velocity_to_carla_vector(ros_angular_velocity : Vector3) -> Vector3D:
     """
     Convert a ROS AngularVelocity to a CARLA Vector3D.
     
@@ -111,9 +111,9 @@ def ros_angular_velocity_to_carla_vector(ros_angular_velocity : Vector3) -> carl
         ros_angular_velocity (Vector3): The ROS AngularVelocity to convert.
         
     Returns:
-        carla.Vector3D: The converted CARLA Vector3D.
+        Vector3D: The converted CARLA Vector3D.
     """
-    return carla.Vector3D(
+    return Vector3D(
         ros_angular_velocity.x * 180 / math.pi,
         -ros_angular_velocity.y * 180 / math.pi,
         ros_angular_velocity.z * 180 / math.pi
@@ -123,12 +123,12 @@ def ros_angular_velocity_to_carla_vector(ros_angular_velocity : Vector3) -> carl
 #################################################################
 #################################################################
 
-def carla_vector_to_ros_vector3(carla_vector: carla.Vector3D) -> Vector3:
+def carla_vector_to_ros_vector3(carla_vector: Vector3D) -> Vector3:
     """
     Convert a CARLA Vector3D to a ROS Vector3.
     
     Args:
-        carla_vector (carla.Vector3D): The CARLA Vector3D to convert.
+        carla_vector (Vector3D): The CARLA Vector3D to convert.
         
     Returns:
         Vector3: The converted ROS Vector3.

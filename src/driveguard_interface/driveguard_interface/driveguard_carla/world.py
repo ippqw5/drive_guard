@@ -1,6 +1,6 @@
 from enum import Enum
 from abc import ABC, abstractmethod
-from carla import Vector3D, Rotation, Location, Transform
+from .carla_types import Vector3D, Rotation, Location, Transform
 
 from ..driveguard_node import DriveGuardNode
 from .actor import Actor
@@ -30,7 +30,8 @@ class World():
         self.id = 0
         self.debug = None
         
-        self.node = DriveGuardNode()
+        # Use singleton pattern for DriveGuardNode
+        self.node = DriveGuardNode.get_instance()
         self.node.world = self
         self.ego_vehicle = Vehicle(name="vehicle", node=self.node)
         self.ego_imu = Sensor(name="imu", node=self.node)
@@ -87,6 +88,8 @@ class World():
         self.ego_imu = None
         self.ego_camera = None
         self.ego_lidar = None
+        World._initialized = False
+        World._instance = None
 
 class Client():
     def __init__(self):

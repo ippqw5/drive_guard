@@ -15,6 +15,7 @@ from geometry_msgs.msg import Pose, Transform, Twist, Vector3, Accel
 from .settings import *
 
 _drive_guard_node_instance = None
+_drive_guard_node_lock = threading.Lock()
 
 class DriveGuardNode(Node):
     """
@@ -35,7 +36,9 @@ class DriveGuardNode(Node):
         """
         global _drive_guard_node_instance
         if _drive_guard_node_instance is None:
-            _drive_guard_node_instance = DriveGuardNode()
+            with _drive_guard_node_lock:
+                if _drive_guard_node_instance is None:
+                    _drive_guard_node_instance = DriveGuardNode()
         return _drive_guard_node_instance
 
     def __init__(self):
@@ -146,6 +149,8 @@ class DriveGuardNode(Node):
             self.spin_thread.join()
         super().destroy_node()        
         self.get_logger().warn("Destroyed")
+        global _drive_guard_node_instance
+        _drive_guard_node_instance = None
 
 ####################################################################
 ####################################################################
@@ -278,6 +283,7 @@ class DriveGuardNode(Node):
         global_pose.position.x = transform.transform.translation.x
         global_pose.position.y = transform.transform.translation.y
         global_pose.position.z = transform.transform.translation.z
+        global_pose.orientation = transform.transform.rotation
         return global_pose
 
     def get_twist(self, is_global=True) -> Twist:
