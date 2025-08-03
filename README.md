@@ -3,13 +3,14 @@
 ## 1.项目介绍
 
 各功能包功能如下：
-- driveguard_gazebo 仿真相关功能包
-- driveguard_cartographer 建图与定位配置
-- driveguard_navigation2 导航配置
-- driveguard_interface  提供易用的对外接口，屏蔽ros细节
+- driveguard_gazebo 仿真相关功能包，包含两轮差速和阿克曼底盘的仿真模型
+- driveguard_navigation2 基于Navigation2的导航功能包，支持两轮差速和阿克曼底盘
+- driveguard_cartographer 基于cartographer的建图/定位功能包
 - driveguard_arbitrator  仲裁节点，提供多种导航算法的切换
-- driveguard_ai AI相关功能包
-- driveguard_drlnav 基于强化学习的导航功能包，使用turtlebot3作为测试平台
+- driveguard_drlnav 基于强化学习的导航功能包
+- driveguard_interface DriveGuard平台的Python API，屏蔽ROS2细节
+    - driveguard_vision_control 基于深度学习的端到端视觉控制功能包
+    - driveguard_carla 实现Carla Python API，供Carla应用"无缝"对接
 
 ## 2.使用方法   
 
@@ -48,9 +49,6 @@ sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
 sudo apt install ros-humble-cv-bridge
 pip3 install opencv-python
 
-# calar python api
-pip3 install carla
-
 # 视觉控制相关依赖
 pip3 install torch torchvision torchaudio matplotlib tensorboard tqdm
 ```
@@ -85,12 +83,10 @@ ros2 launch driveguard_cartographer cartographer.launch.py
 ```
 #两轮差速
 source setup.sh
-# option:use_arbitrator 启用仲裁节点
 ros2 launch driveguard_navigation2 nav2_diff_drive.launch.py # :use_arbitrator=true
 
 #阿克曼
 source setup.sh
-# option:use_arbitrator
 ros2 launch driveguard_navigation2 nav2_racecar.launch.py # :use_arbitrator=true
 ```
 
